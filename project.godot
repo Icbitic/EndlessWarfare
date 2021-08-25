@@ -11,7 +11,14 @@ config_version=4
 [application]
 
 config/name="Endless Warfare"
+run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+GlobalWorld="*res://game_world/World.gd"
+LogRecorder="*res://LogRecorder.gd"
+Mods="*res://Mods.gd"
 
 [physics]
 
