@@ -47,5 +47,6 @@ func search_pck(path, intended = false):
 						
 			file_name = dir.get_next()
 	else:
-		LogRecorder.record("pcks folder is missing")
+		LogRecorder.record(path + " is missing")
+		return ERR_DOES_NOT_EXIST
 	dir.list_dir_end()
