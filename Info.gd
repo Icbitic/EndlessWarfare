@@ -7,3 +7,8 @@ var info = {
 var constant = {
 	"cell_size": 8
 }
+
+var settings = {
+	"echo_recordings": true,
+	"record_navigation_details": true
+}

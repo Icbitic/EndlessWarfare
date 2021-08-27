@@ -1,7 +1,6 @@
 extends Node2D
 
 var rec = []
-var echo_recordings = true
 
 signal log_recorded
 
@@ -21,7 +20,7 @@ func record(massage, level = 0):
 	}
 	
 	rec.append(content)
-	if echo_recordings:
+	if Info.settings.echo_recordings:
 		print(get_time_str(content.time) + content.text)
 		
 	emit_signal("log_recorded")
