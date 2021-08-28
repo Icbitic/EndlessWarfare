@@ -10,5 +10,6 @@ var constant = {
 
 var settings = {
 	"echo_recordings": true,
-	"record_navigation_details": true
+	"record_navigation_details": false,
+	"enable_test_set": false
 }
