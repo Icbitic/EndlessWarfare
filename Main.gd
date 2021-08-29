@@ -18,4 +18,15 @@ func _ready():
 func is_compatible(pck):
 	if pck.has("version_support") == false:
 		return ERR_DOES_NOT_EXIST
-	return Info.info.version.match(pck.version_support)
+	match typeof(pck.version_support):
+		TYPE_STRING:
+			return Info.info.version.match(pck.version_support)
+		TYPE_ARRAY:
+			var res = false
+			for i in pck.version_support:
+				if Info.info.version.match(i):
+					res = true
+			return res
+		_:
+			LogRecorder.record("Unknow type of version_support", 1)
+			return ERR_DOES_NOT_EXIST

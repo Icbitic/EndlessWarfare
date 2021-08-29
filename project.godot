@@ -16,12 +16,12 @@ config/icon="res://icon.png"
 
 [autoload]
 
-GlobalWorld="*res://game_world/World.gd"
 LogRecorder="*res://LogRecorder.gd"
 Info="*res://Info.gd"
 PckLoader="*res://PCKLoader.gd"
 GlobalNavigation="*res://game_world/Navigation.gd"
 Database="*res://game_world/Database.gd"
+GlobalWorld="*res://game_world/World.gd"
 
 [physics]
 

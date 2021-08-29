@@ -3,7 +3,7 @@ extends Node2D
 var pcks = []
 func load_pck(path):
 	
-	#Don't use res:// here
+	# Don't send res:// here
 	search_pck(path)
 	
 	
@@ -33,8 +33,11 @@ func search_pck(path, intended = false):
 						else:
 							LogRecorder.record("info.json is missing")
 						
-						ProjectSettings.load_resource_pack(dir.get_current_dir()
-								+ "//" + file_name)
+						if !ProjectSettings.load_resource_pack(dir.get_current_dir()
+								+ "//" + file_name):
+							LogRecorder.record("Unable to load "
+									+ dir.get_current_dir()+ "//" + file_name, 1)
+							break
 								
 						var scene = load(info.name + ".tscn")
 						var pck = {
@@ -44,6 +47,7 @@ func search_pck(path, intended = false):
 							"version_support": info.version_support
 						}
 						pcks.append(pck)
+						LogRecorder.record(str(pck.name) + " is loaded successfully.")
 						
 			file_name = dir.get_next()
 	else:

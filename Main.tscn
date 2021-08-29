@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
+[ext_resource path="res://Test/Test.gd" type="Script" id=1]
 [ext_resource path="res://Main.gd" type="Script" id=2]
 [ext_resource path="res://HUD.tscn" type="PackedScene" id=3]
 [ext_resource path="res://game_world/World.tscn" type="PackedScene" id=4]
@@ -21,3 +22,6 @@ script = ExtResource( 5 )
 script = ExtResource( 6 )
 
 [node name="Info" parent="." instance=ExtResource( 7 )]
+
+[node name="Test" type="Node2D" parent="."]
+script = ExtResource( 1 )

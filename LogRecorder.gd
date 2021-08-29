@@ -1,7 +1,6 @@
 extends Node2D
 
 var rec = []
-var echo_recordings = true
 
 signal log_recorded
 
@@ -12,7 +11,7 @@ func get_time_str(time):
 			t[i] = "0" + t[i]
 	return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")
 
-#APIs
+# APIs
 func record(massage, level = 0):
 	var content = {
 		"time": OS.get_time(),
@@ -21,7 +20,7 @@ func record(massage, level = 0):
 	}
 	
 	rec.append(content)
-	if echo_recordings:
+	if Info.settings.echo_recordings:
 		print(get_time_str(content.time) + content.text)
 		
 	emit_signal("log_recorded")

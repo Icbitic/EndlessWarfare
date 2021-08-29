@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://HUD/Rolling Selection/TextureButton.gd" type="Script" id=2]
+
+[sub_resource type="Animation" id=1]
+resource_name = "Decrease"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 2, 2 ), Vector2( 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "increase"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 2, 2 ) ]
+}
+
+[node name="TextureButton" type="TextureButton"]
+margin_left = -32.0
+margin_top = -32.0
+margin_right = 32.0
+margin_bottom = 32.0
+rect_scale = Vector2( 2, 2 )
+rect_pivot_offset = Vector2( 32, 32 )
+texture_normal = ExtResource( 1 )
+texture_pressed = ExtResource( 1 )
+texture_hover = ExtResource( 1 )
+texture_disabled = ExtResource( 1 )
+texture_focused = ExtResource( 1 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Decrease = SubResource( 1 )
+anims/increase = SubResource( 2 )
+
+[node name="Label" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -20.0
+margin_top = -14.0
+margin_right = 20.0
+text = "John"
+
+[connection signal="mouse_entered" from="." to="." method="_on_TextureButton_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_TextureButton_mouse_exited"]
