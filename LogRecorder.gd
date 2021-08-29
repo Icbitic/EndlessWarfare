@@ -11,7 +11,7 @@ func get_time_str(time):
 			t[i] = "0" + t[i]
 	return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")
 
-#APIs
+# APIs
 func record(massage, level = 0):
 	var content = {
 		"time": OS.get_time(),

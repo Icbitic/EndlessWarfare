@@ -3,7 +3,7 @@ extends Node2D
 var pcks = []
 func load_pck(path):
 	
-	#Don't use res:// here
+	# Don't send res:// here
 	search_pck(path)
 	
 	
