@@ -1,17 +1,10 @@
-extends Node2D
-
-var rec = []
+extends Node
 
 signal log_recorded
 
-func get_time_str(time):
-	var t = [str(time.hour), str(time.minute), str(time.second)]
-	for i in t.size():
-		if t[i].length() == 1:
-			t[i] = "0" + t[i]
-	return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")
+var rec = []
 
-# APIs
+# Public Methods
 func record(massage, level = 0):
 	var content = {
 		"time": OS.get_time(),
@@ -27,3 +20,11 @@ func record(massage, level = 0):
 
 func get_record():
 	return rec
+
+# Private Methods
+func get_time_str(time):
+	var t = [str(time.hour), str(time.minute), str(time.second)]
+	for i in t.size():
+		if t[i].length() == 1:
+			t[i] = "0" + t[i]
+	return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")

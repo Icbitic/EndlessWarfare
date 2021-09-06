@@ -1,11 +1,12 @@
-extends Node2D
+extends Node
 
 func _ready():
 	if Info.settings.enable_test_set:
 		# Test GlobalNavigation
 		GlobalNavigation.search_path(Vector2(0, 0), Vector2(0, 1))
 		
+		var data = Database.new()
+		
 		# Test Database
-		Database.add_area("BaseGame")
-		Database.set_value("BaseGame", "text", "Database tested")
-		LogRecorder.record(Database.get_value("TestMod", "text") + " successfully")
+		data.set_value("text", "Database tested")
+		LogRecorder.record(data.get_value("text") + " successfully")
