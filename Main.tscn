@@ -15,7 +15,7 @@ script = ExtResource( 2 )
 
 [node name="HUD" parent="." instance=ExtResource( 3 )]
 
-[node name="PCKLoader" type="Node" parent="."]
+[node name="PacksManager" type="Node" parent="."]
 script = ExtResource( 5 )
 
 [node name="LogRecorder" type="Node" parent="."]
