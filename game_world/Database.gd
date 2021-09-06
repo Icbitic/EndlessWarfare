@@ -1,17 +1,21 @@
+class_name Database
 extends Node2D
 
 var data = {}
 
-#APIs
-func add_area(identifier):
-	if data.has(identifier):
-		return ERR_ALREADY_EXISTS
-	data[identifier] = {}
-
-func set_value(identifier, key, value):
-	if data.has(identifier) == false:
-		return ERR_DOES_NOT_EXIST
-	data[identifier][key] = value
+# Public Methods
+func set_value(key, value):
+	data[key] = value
+	return OK
 	
-func get_value(identifier, key):
-	return data[identifier][key]
+func get_value(key):
+	return data[key]
+
+func remove_value(key):
+	if not data.has(key):
+		return ERR_DOES_NOT_EXIST
+	data.erase(key)
+	return OK
+	
+func get_data():
+	return data

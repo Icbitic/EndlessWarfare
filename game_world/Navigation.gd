@@ -2,7 +2,7 @@ extends Navigation2D
 
 
 
-#APIs
+# Public Methods
 func search_path(start: Vector2, end: Vector2, optimize: bool = true):
 	
 	if Info.settings.record_navigation_details:
