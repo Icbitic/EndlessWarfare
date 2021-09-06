@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 var info = {
 	"version": "0.2.1"
@@ -11,5 +11,5 @@ var constant = {
 var settings = {
 	"echo_recordings": true,
 	"record_navigation_details": false,
-	"enable_test_set": true
+	"enable_test_set": false
 }

@@ -8,22 +8,6 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Node2D",
-"class": "Database",
-"language": "GDScript",
-"path": "res://game_world/Database.gd"
-}, {
-"base": "Node",
-"class": "Pack",
-"language": "GDScript",
-"path": "res://pck_loading/pck.gd"
-} ]
-_global_script_class_icons={
-"Database": "",
-"Pack": ""
-}
-
 [application]
 
 config/name="Endless Warfare"
@@ -34,9 +18,10 @@ config/icon="res://icon.png"
 
 LogRecorder="*res://LogRecorder.gd"
 Info="*res://Info.gd"
+PckLoader="*res://PCKLoader.gd"
 GlobalNavigation="*res://game_world/Navigation.gd"
+Database="*res://game_world/Database.gd"
 GlobalWorld="*res://game_world/World.gd"
-PacksManager="*res://pck_loading/PacksManager.gd"
 
 [physics]
 
