@@ -16,9 +16,9 @@ var chunk_position = Vector2()
 
 var map
 
-func generate():
-	self.data = TerrainGenerator.generate(chunk_position)
-	
+func generate(random_seed):
+	self.data = TerrainGenerator.generate(chunk_position, random_seed)
+	return OK
 	
 func _set_data(value):
 	data = value
@@ -29,4 +29,5 @@ func _draw_chunk():
 		for i in range(CHUNK_SIZE):
 			for j in range(CHUNK_SIZE):
 				if data.has(Vector3(i, j, z)):
-					map.set_cell(CHUNK_SIZE * chunk_position.x + i, CHUNK_SIZE * chunk_position.y + j, z, data[Vector3(i, j ,z)])
+					map.set_cell(CHUNK_SIZE * chunk_position.x + i, CHUNK_SIZE * chunk_position.y + j, z, data[Vector3(i, j ,z)], false)
+	return OK

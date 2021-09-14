@@ -69,7 +69,6 @@ script = ExtResource( 3 )
 tile_set = SubResource( 1 )
 cell_size = Vector2( 8, 8 )
 format = 1
-tile_data = PoolIntArray( -262160, 2, 0, -196624, 2, 0, -131088, 2, 0, -65552, 2, 0, -16, 2, 0, 65520, 2, 0, 131056, 2, 0 )
 script = ExtResource( 2 )
 
 [node name="Path" type="TileMap" parent="Map"]
@@ -97,4 +96,4 @@ script = ExtResource( 5 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
-zoom = Vector2( 2, 2 )
+zoom = Vector2( 4, 4 )
