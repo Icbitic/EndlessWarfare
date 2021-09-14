@@ -1,18 +1,18 @@
 extends Node
 
-var pcks = []
+var packs = {}
 
 # Public Methods
 
-func load_pck(path):
+func load_packs(path):
 	# Don't send res:// here
-	return _search_pck(path)
+	return _search_packs(path)
 	
-func get_pcks():
-	return pcks
+func get_packs():
+	return packs
 	
 # Privare Methods
-func _search_pck(path, intended = false):
+func _search_packs(path, intended = false):
 	var dir = Directory.new()
 	if dir.open(path) == OK:
 		dir.list_dir_begin(true, true)
@@ -20,25 +20,24 @@ func _search_pck(path, intended = false):
 		while file_name != "":
 			if dir.current_is_dir() and !intended:
 				pass
-				_search_pck(path + "//" + file_name, true)
+				_search_packs(path + "//" + file_name, true)
 			else:
 				if file_name.match("*.pck"):
 					if dir.get_current_dir() != path:
 						var file = File.new()
 						var info
-						if (file.open(dir.get_current_dir()
-								+ "//info.json", File.READ)) == OK:
-							info = parse_json(file.get_line())
+						if (file.open(dir.get_current_dir() + "//info.json", File.READ)) == OK:
+							info = parse_json(file.get_as_text())
 						else:
-							LogRecorder.record("info.json is missing")
+							LogRecorder.record("Unable to load" + dir.get_current_dir() + "//info.json")
+						
 						
 						if !ProjectSettings.load_resource_pack(dir.get_current_dir()
 								+ "//" + file_name):
-							LogRecorder.record("Unable to load "
-									+ dir.get_current_dir()+ "//" + file_name, 1)
+							LogRecorder.record("Unable to load " + dir.get_current_dir()+ "//" + file_name, 1)
 							break
-								
-						var scene = load(info.name + ".tscn")
+						
+						var scene = load("res://" + info.name + "//" + info.name + ".tscn")
 						var pack_data = {
 							"scene": scene,
 							"name": info.name,
@@ -47,7 +46,7 @@ func _search_pck(path, intended = false):
 						}
 						var package = Pack.new()
 						package.setup_data(pack_data)
-						pcks.append(package)
+						packs[pack_data.name] = package
 						LogRecorder.record(str(pack_data.name) + " is loaded successfully.")
 						
 			file_name = dir.get_next()

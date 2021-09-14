@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Node",
+"class": "Chunk",
+"language": "GDScript",
+"path": "res://game_world/chunk.gd"
+}, {
 "base": "Node2D",
 "class": "Database",
 "language": "GDScript",
@@ -17,11 +22,24 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "Pack",
 "language": "GDScript",
-"path": "res://pck_loading/pck.gd"
+"path": "res://packs_manager/pck.gd"
+}, {
+"base": "TileMap",
+"class": "PlaneMap",
+"language": "GDScript",
+"path": "res://game_world/map/plane_map.gd"
+}, {
+"base": "Node",
+"class": "TerrainGenerator",
+"language": "GDScript",
+"path": "res://game_world/terrain_generator/terrain_generator.gd"
 } ]
 _global_script_class_icons={
+"Chunk": "",
 "Database": "",
-"Pack": ""
+"Pack": "",
+"PlaneMap": "",
+"TerrainGenerator": ""
 }
 
 [application]
@@ -35,8 +53,29 @@ config/icon="res://icon.png"
 LogRecorder="*res://LogRecorder.gd"
 Info="*res://Info.gd"
 GlobalNavigation="*res://game_world/Navigation.gd"
-GlobalWorld="*res://game_world/World.gd"
-PacksManager="*res://pck_loading/PacksManager.gd"
+
+[importer_defaults]
+
+texture={
+"compress/bptc_ldr": 0,
+"compress/hdr_mode": 0,
+"compress/lossy_quality": 0.7,
+"compress/mode": 0,
+"compress/normal_map": 0,
+"detect_3d": false,
+"flags/anisotropic": false,
+"flags/filter": false,
+"flags/mipmaps": false,
+"flags/repeat": 0,
+"flags/srgb": 2,
+"process/HDR_as_SRGB": false,
+"process/fix_alpha_border": true,
+"process/invert_color": false,
+"process/premult_alpha": false,
+"size_limit": 0,
+"stream": false,
+"svg/scale": 1.0
+}
 
 [physics]
 

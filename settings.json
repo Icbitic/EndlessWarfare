@@ -1,0 +1,6 @@
+{
+    "echo_recordings": true,
+    "restore_logs_to_memory": false,
+    "record_navigation_details": false,
+    "enable_test_set": true
+}

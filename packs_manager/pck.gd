@@ -30,7 +30,7 @@ func check_compatibility():
 		TYPE_ARRAY:
 			var res = false
 			for i in data.version_support:
-				if Info.info.version.match(i):
+				if Info.version.match(i):
 					res = true
 			return res
 		_:
