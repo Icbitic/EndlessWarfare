@@ -26,11 +26,11 @@ func check_compatibility():
 		return ERR_DOES_NOT_EXIST
 	match typeof(data.version_support):
 		TYPE_STRING:
-			return Info.info.version.match(data.version_support)
+			return Settings.info.version.match(data.version_support)
 		TYPE_ARRAY:
 			var res = false
 			for i in data.version_support:
-				if Info.version.match(i):
+				if Settings.version.match(i):
 					res = true
 			return res
 		_:

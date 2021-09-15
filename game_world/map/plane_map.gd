@@ -1,7 +1,6 @@
 class_name PlaneMap
 extends TileMap
 
-
 func _ready():
 	pass
 

@@ -1,9 +1,7 @@
 extends Node
 
 func _ready():
-	if Info.settings.enable_test_set:
-		# Test GlobalNavigation
-		GlobalNavigation.search_path(Vector2(0, 0), Vector2(0, 1))
+	if Settings.enable_test_set:
 		
 		var data = Database.new()
 		

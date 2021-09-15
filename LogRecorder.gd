@@ -12,9 +12,9 @@ func record(massage, level = 0):
 		"level": level
 	}
 	
-	if Info.settings.restore_logs_to_memory:
+	if Settings.restore_logs_to_memory:
 		rec.append(content)
-	if Info.settings.echo_recordings:
+	if Settings.echo_recordings:
 		print(get_time_str(content.time) + content.text)
 		
 	emit_signal("log_recorded")

@@ -9,7 +9,7 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Node",
+"base": "Node2D",
 "class": "Chunk",
 "language": "GDScript",
 "path": "res://game_world/chunk.gd"
@@ -51,8 +51,7 @@ config/icon="res://icon.png"
 [autoload]
 
 LogRecorder="*res://LogRecorder.gd"
-Info="*res://Info.gd"
-GlobalNavigation="*res://game_world/Navigation.gd"
+Settings="*res://Settings.gd"
 
 [importer_defaults]
 

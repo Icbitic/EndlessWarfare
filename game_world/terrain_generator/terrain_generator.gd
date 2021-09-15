@@ -8,10 +8,14 @@ enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
 enum {BLACK_WALL}
 
 const CHUNK_SIZE = 16
+const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 # This MAP_SIZE refers to cells
 const MAP_SIZE = 256
+const MAP_MIDPOINT = Vector2(0.5, 0.5) * MAP_SIZE
 
 const LAND_THRESHOLD = -0.35
+
+onready var map
 
 func _ready():
 	pass
@@ -37,14 +41,23 @@ static func generate(chunk_position, random_seed):
 						CHUNK_SIZE * chunk_position.y + j)) > LAND_THRESHOLD:
 				
 				data[Vector3(i, j, TERRAIN)] = LAND
+				
+				# Set the nearby cells to LAND to avoid bitmask problems.
+				# The returned array from the range function will not include
+				# the second argument, so it is "i(j) + 2" here.
+				for m in range(i - 1, i + 2):
+					for n in range(j - 1, j + 2):
+						if (m >= 0 and m <= 15) and (n >= 0 and n <= 15):
+							data[Vector3(m, n, TERRAIN)] = LAND
 			else:
-				data[Vector3(i, j, TERRAIN)] = WATER
+				if not data.has(Vector3(i, j, TERRAIN)):
+					data[Vector3(i, j, TERRAIN)] = WATER
 	
 	return data
 
 
 static func _get_falloff_value(x, y):
-	var value = max(abs(x) / (0.5 * MAP_SIZE), abs(y) / (0.5 * MAP_SIZE))
+	var value = max(abs(x - MAP_MIDPOINT.x) / (0.5 * MAP_SIZE), abs(y - MAP_MIDPOINT.y) / (0.5 * MAP_SIZE))
 	
 	var a = 3
 	var b = 2.2

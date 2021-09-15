@@ -1,6 +1,9 @@
 {
+    "version": "0.2.1",
     "echo_recordings": true,
     "restore_logs_to_memory": false,
     "record_navigation_details": false,
-    "enable_test_set": true
+    "enable_test_set": true,
+    "draw_chunk_outline": false,
+    "draw_cell_outline": false
 }
