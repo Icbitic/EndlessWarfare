@@ -20,7 +20,7 @@ onready var map
 func _ready():
 	pass
 
-static func generate(chunk_position, random_seed):
+static func generate(chunk, random_seed):
 	var data = {}
 	
 	# Generate Terrain
@@ -34,11 +34,11 @@ static func generate(chunk_position, random_seed):
 	for i in range(CHUNK_SIZE):
 		for j in range(CHUNK_SIZE):
 			if (noise.get_noise_2d(
-						CHUNK_SIZE * chunk_position.x + i,
-						CHUNK_SIZE * chunk_position.y + j)
+						CHUNK_SIZE * chunk.chunk_position.x + i,
+						CHUNK_SIZE * chunk.chunk_position.y + j)
 						- _get_falloff_value(
-						CHUNK_SIZE * chunk_position.x + i,
-						CHUNK_SIZE * chunk_position.y + j)) > LAND_THRESHOLD:
+						CHUNK_SIZE * chunk.chunk_position.x + i,
+						CHUNK_SIZE * chunk.chunk_position.y + j)) > LAND_THRESHOLD:
 				
 				data[Vector3(i, j, TERRAIN)] = LAND
 				
@@ -53,7 +53,9 @@ static func generate(chunk_position, random_seed):
 				if not data.has(Vector3(i, j, TERRAIN)):
 					data[Vector3(i, j, TERRAIN)] = WATER
 	
-	return data
+	chunk.data = data
+	
+	return OK
 
 
 static func _get_falloff_value(x, y):

@@ -91,3 +91,5 @@ offset = Vector2( 1024, 1024 )
 current = true
 smoothing_enabled = true
 script = ExtResource( 9 )
+
+[node name="Tween" type="Tween" parent="Camera2D"]

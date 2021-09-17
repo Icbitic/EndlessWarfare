@@ -1,6 +1,10 @@
 extends Node
 
 enum {TERRAIN, PATH, FLOOR, FENCE, WALL}
+enum {LAND, WATER}
+enum {DIRT_ROAD, STONE_ROAD}
+enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
+enum {BLACK_WALL}
 
 const CHUNK_SIZE = 16
 # This MAP_SIZE refers to cells
@@ -13,7 +17,7 @@ const WORLD_HEIGHT = 5
 var player
 var thread
 
-var _chunks = {}
+var chunks = {}
 
 onready var world = get_parent()
 
@@ -31,8 +35,8 @@ func _ready():
 	
 	_generate()
 	
-	for i in _chunks.keys():
-		draw_chunk(_chunks[i].chunk_position, false)
+	for i in chunks.keys():
+		draw_chunk(chunks[i].chunk_position, false)
 	
 	$Terrain.update_bitmask_region()
 	
@@ -64,7 +68,7 @@ func draw_cell(x, y, z, update_bitmask = true):
 			
 
 func draw_chunk(chunk_position, update = false):
-	var _chunk = _chunks[chunk_position]
+	var _chunk = chunks[chunk_position]
 	for z in range(WORLD_HEIGHT):
 		for i in range(CHUNK_SIZE):
 			for j in range(CHUNK_SIZE):
@@ -74,27 +78,27 @@ func draw_chunk(chunk_position, update = false):
 	
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var chunk_position = Vector2(floor(x / CHUNK_SIZE), floor(y / CHUNK_SIZE))
-	_chunks[chunk_position].set_cell(Vector2(
-			x - CHUNK_SIZE * chunk_position.x,
-			y - CHUNK_SIZE * chunk_position.y),
-			z, tile, update_bitmask)
-	draw_cell(x + CHUNK_SIZE * chunk_position.x,y + CHUNK_SIZE * chunk_position.y,
-			z, update_bitmask)
+	chunks[chunk_position].set_cell(x - CHUNK_SIZE * chunk_position.x,
+			y - CHUNK_SIZE * chunk_position.y, z, tile)
+	draw_cell(x, y, z, update_bitmask)
 
 func get_cell(x, y, z):
 	var chunk_position = Vector2(floor(x / CHUNK_SIZE), floor(y / CHUNK_SIZE))
-	if _chunks[chunk_position].data.has(Vector3(
+	if chunks[chunk_position].data.has(Vector3(
 			x - CHUNK_SIZE * chunk_position.x,
 			y - CHUNK_SIZE * chunk_position.y, z)):
-		return _chunks[chunk_position].data[Vector3(
+		return chunks[chunk_position].data[Vector3(
 				x - CHUNK_SIZE * chunk_position.x,
 				y - CHUNK_SIZE * chunk_position.y, z)]
 	return ERR_DOES_NOT_EXIST
 
 func _generate():
 	# The random_seed is required to keep sync of all the chunks' random seed
-	#randomize()
-	var random_seed = 1#randi()
+	randomize()
+	var random_seed = randi()
+	
+	LogRecorder.record("Starting generating the world.")
+	var initial_time = OS.get_ticks_msec()
 	
 	# If MAP_SIZE / CHUNK_SIZE cannot be a integer
 	# Use the closest integer smaller than it instead
@@ -105,7 +109,41 @@ func _generate():
 			var _chunk = Chunk.new()
 			var _chunk_position = Vector2(i, j)
 			_chunk.chunk_position = _chunk_position
-			_chunks[_chunk_position] = _chunk
-			_chunk.generate(random_seed)
+			chunks[_chunk_position] = _chunk
 			$Chunks.add_child(_chunk)
+	
+	var terrain_generator = TerrainGenerator.new()
+	
+	terrain_generator.map = chunks
+	
+	for i in chunks.keys():
+		terrain_generator.generate(chunks[i], random_seed)
+	
+	# Post process the map
+	# First to remove the cells of wrong bitmasks
+	var template1 = {
+		Vector2(-1, -1): LAND, Vector2(0, -1): LAND, Vector2(1, -1): WATER,
+		Vector2(-1, 0): LAND, Vector2(0, 0): LAND, Vector2(1, 0): LAND,
+		Vector2(-1, 1): WATER, Vector2(0, 1): LAND, Vector2(1, 1): LAND
+	}
+	var template2 = {
+		Vector2(-1, -1): WATER, Vector2(0, -1): LAND, Vector2(1, -1): LAND,
+		Vector2(-1, 0): LAND, Vector2(0, 0): LAND, Vector2(1, 0): LAND,
+		Vector2(-1, 1): LAND, Vector2(0, 1): LAND, Vector2(1, 1): WATER
+	}
+	# The edge of the map must be WATER, so we don't need to care about them
+	for i in range(1, MAP_SIZE - 1):
+		for j in range(1, MAP_SIZE - 1):
+			var nearby = {
+				Vector2(-1, -1): get_cell(i - 1, j - 1, TERRAIN), Vector2(0, -1): get_cell(i, j - 1, TERRAIN), Vector2(1, -1): get_cell(i + 1, j - 1, TERRAIN),
+				Vector2(-1, 0): get_cell(i - 1, j, TERRAIN), Vector2(0, 0): get_cell(i, j, TERRAIN), Vector2(1, 0): get_cell(i + 1, j, TERRAIN),
+				Vector2(-1, 1): get_cell(i - 1, j + 1, TERRAIN), Vector2(0, 1): get_cell(i, j + 1, TERRAIN), Vector2(1, 1): get_cell(i + 1, j + 1, TERRAIN)
+			}
+			if (nearby.hash() == template1.hash() or 
+					nearby.hash() == template2.hash()):
+				for m in range(i - 1, i + 2):
+					for n in range(j - 1, j + 2):
+						set_cell(m, n, TERRAIN, LAND)
+	var final_time = OS.get_ticks_msec()
+	LogRecorder.record("Finished generating the world, with the time of " + str(((final_time as float) - (initial_time as float)) / 1000) + "s")
 	return OK

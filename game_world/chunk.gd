@@ -51,11 +51,8 @@ func _ready():
 		line.width = 1
 		add_child(line)
 
-func generate(random_seed):
-	data = TerrainGenerator.generate(chunk_position, random_seed)
-	return OK
 
-func set_cell(x, y, z, tile, update_bitmask = true):
+func set_cell(x, y, z, tile):
 	if data.has(Vector3(x, y, z)):
 		data[Vector3(x, y, z)] = tile
 		return OK

@@ -5,6 +5,7 @@ const MOVE_SPEED = 150
 const ZOOM_SPEED = 2
 const TEXTURE_SHEET_WIDTH = 8
 
+var _target_zoom = zoom
 
 func _ready():
 	pass
@@ -25,7 +26,15 @@ func _process(delta):
 	
 	position += velocity
 	
+	
 	if Input.is_action_just_released("zoom_in"):
-		zoom -= ZOOM_SPEED * delta * Vector2(1, 1)
+		_target_zoom = clamp(zoom.x - ZOOM_SPEED * 0.2, 0.5, 1)
+		_target_zoom = _target_zoom * Vector2(1, 1)
 	if Input.is_action_just_released("zoom_out"):
-		zoom += ZOOM_SPEED * delta * Vector2(1, 1)
+		_target_zoom = clamp(zoom.x + ZOOM_SPEED * 0.2, 0.5, 1)
+		_target_zoom = _target_zoom * Vector2(1, 1)
+		
+	$Tween.interpolate_property(self, "zoom",
+	zoom, _target_zoom, 0.1,
+	Tween.TRANS_LINEAR, Tween.EASE_OUT_IN)
+	$Tween.start()
