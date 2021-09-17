@@ -89,4 +89,5 @@ script = ExtResource( 5 )
 [node name="Camera2D" type="Camera2D" parent="."]
 offset = Vector2( 1024, 1024 )
 current = true
+smoothing_enabled = true
 script = ExtResource( 9 )
