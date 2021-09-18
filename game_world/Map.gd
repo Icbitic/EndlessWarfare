@@ -8,7 +8,7 @@ enum {BLACK_WALL}
 
 const CHUNK_SIZE = 16
 # This MAP_SIZE refers to cells
-const MAP_SIZE = 256
+const MAP_SIZE = 512
 const MAP_MIDPOINT = Vector2(0.5, 0.5) * MAP_SIZE
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 const CHUNK_END_SIZE = CHUNK_SIZE - 1
@@ -94,8 +94,8 @@ func get_cell(x, y, z):
 
 func _generate():
 	# The random_seed is required to keep sync of all the chunks' random seed
-	#randomize()
-	var random_seed = 1#randi()
+	randomize()
+	var random_seed = randi()
 	
 	LogRecorder.record("Starting generating the world.")
 	var initial_time = OS.get_ticks_msec()

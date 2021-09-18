@@ -10,7 +10,7 @@ enum {BLACK_WALL}
 const CHUNK_SIZE = 16
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 # This MAP_SIZE refers to cells
-const MAP_SIZE = 256
+const MAP_SIZE = 512
 const MAP_MIDPOINT = Vector2(0.5, 0.5) * MAP_SIZE
 
 const LAND_THRESHOLD = -0.35
