@@ -94,8 +94,8 @@ func get_cell(x, y, z):
 
 func _generate():
 	# The random_seed is required to keep sync of all the chunks' random seed
-	randomize()
-	var random_seed = randi()
+	#randomize()
+	var random_seed = 1#randi()
 	
 	LogRecorder.record("Starting generating the world.")
 	var initial_time = OS.get_ticks_msec()
@@ -138,9 +138,9 @@ func _generate():
 	# reduce by 0.686s per 65535 cells on my laptop.
 	var _map_cache = []
 	_map_cache.resize(MAP_SIZE)
-	var _column_cache = []
-	_column_cache.resize(MAP_SIZE)
 	for i in range(MAP_SIZE):
+		var _column_cache = []
+		_column_cache.resize(MAP_SIZE)
 		_map_cache[i] = _column_cache
 
 	for i in range(MAP_SIZE):
@@ -160,6 +160,9 @@ func _generate():
 				for m in range(i - 1, i + 2):
 					for n in range(j - 1, j + 2):
 						set_cell(m, n, TERRAIN, LAND)
+	
 	var final_time = OS.get_ticks_msec()
-	LogRecorder.record("Finished generating the world, with the time of " + str(((final_time as float) - (initial_time as float)) / 1000) + "s")
+	LogRecorder.record("Finished generating the world, with the time of " +
+			str(((final_time as float) - (initial_time as float)) / 1000) + "s")
+	
 	return OK
