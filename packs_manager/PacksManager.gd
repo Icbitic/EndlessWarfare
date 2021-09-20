@@ -32,9 +32,9 @@ func _search_packs(path, intended = false):
 							LogRecorder.record("Unable to load" + dir.get_current_dir() + "//info.json")
 						
 						
-						if !ProjectSettings.load_resource_pack(dir.get_current_dir()
+						if not ProjectSettings.load_resource_pack(dir.get_current_dir()
 								+ "//" + file_name):
-							LogRecorder.record("Unable to load " + dir.get_current_dir()+ "//" + file_name, 1)
+							LogRecorder.record("Unable to load " + dir.get_current_dir()+ "/" + file_name, 1)
 							break
 						
 						var scene = load("res://" + info.name + "//" + info.name + ".tscn")

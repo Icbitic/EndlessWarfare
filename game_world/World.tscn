@@ -2,7 +2,7 @@
 
 [ext_resource path="res://game_world/World.gd" type="Script" id=1]
 [ext_resource path="res://game_world/map/plane_map.gd" type="Script" id=2]
-[ext_resource path="res://game_world/Map.gd" type="Script" id=3]
+[ext_resource path="res://game_world/map/Map.gd" type="Script" id=3]
 [ext_resource path="res://asset/Tiles.png" type="Texture" id=4]
 [ext_resource path="res://game_world/player.gd" type="Script" id=5]
 [ext_resource path="res://game_world/Navigation.tscn" type="PackedScene" id=6]
@@ -86,10 +86,10 @@ script = ExtResource( 7 )
 [node name="0" type="Node2D" parent="Players"]
 script = ExtResource( 5 )
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="Players/0"]
 offset = Vector2( 1024, 1024 )
 current = true
 smoothing_enabled = true
 script = ExtResource( 9 )
 
-[node name="Tween" type="Tween" parent="Camera2D"]
+[node name="Tween" type="Tween" parent="Players/0/Camera2D"]

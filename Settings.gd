@@ -2,6 +2,9 @@ extends Node
 
 var version = "0.2.1"
 
+# The map_size should be greater than 96
+var map_size = 256
+
 var echo_recordings = true
 var restore_logs_to_memory = false
 var record_navigation_details = false

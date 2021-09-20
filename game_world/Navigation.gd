@@ -15,6 +15,9 @@ func remove_cell(x, y):
 func remove_cellv(pos):
 	$TileMap.set_cell(pos, -1)
 	
+func update():
+	$TileMap.update_dirty_quadrants()
+	
 func search_path(start: Vector2, end: Vector2, optimize: bool = true):
 	
 	if Settings.record_navigation_details:
