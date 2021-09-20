@@ -28,4 +28,7 @@ func get_time_str(time):
 	for i in t.size():
 		if t[i].length() == 1:
 			t[i] = "0" + t[i]
-	return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")
+	if Settings.logs_in_milliseconds:
+		return ("[" + str(OS.get_ticks_msec()) + "ms]")
+	else:
+		return ("[" + t[0] + ":" + t[1] + ":" + t[2] + "]")

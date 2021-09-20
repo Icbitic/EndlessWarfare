@@ -79,8 +79,6 @@ script = ExtResource( 2 )
 format = 1
 script = ExtResource( 7 )
 
-[node name="Chunks" type="Node2D" parent="Map"]
-
 [node name="Players" type="Node2D" parent="."]
 
 [node name="0" type="Node2D" parent="Players"]

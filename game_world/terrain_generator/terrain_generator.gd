@@ -36,29 +36,23 @@ func generate(chunks):
 	noise.octaves = 5
 	noise.period = 64
 	noise.persistence = 0.8
-	for chunk in chunks.data.keys():
-		for i in range(CHUNK_SIZE):
-			for j in range(CHUNK_SIZE):
-				if (noise.get_noise_2d(
-							CHUNK_SIZE * chunks.data[chunk].chunk_position.x + i,
-							CHUNK_SIZE * chunks.data[chunk].chunk_position.y + j)
-							- _get_falloff_value(
-							CHUNK_SIZE * chunks.data[chunk].chunk_position.x + i,
-							CHUNK_SIZE * chunks.data[chunk].chunk_position.y + j)) > LAND_THRESHOLD:
-					
-					chunks.data[chunk].data[Vector3(i, j, TERRAIN)] = LAND
-					
-					# Set the nearby cells to LAND to avoid bitmask problems.
-					# The returned array from the range function will not include
-					# the second argument, so it is "i(j) + 2" here.
-					for m in range(i - 1, i + 2):
-						for n in range(j - 1, j + 2):
-							if (m >= 0 and m <= 15) and (n >= 0 and n <= 15):
-								chunks.data[chunk].data[Vector3(m, n, TERRAIN)] = LAND
-				else:
-					if not chunks.data[chunk].data.has(Vector3(i, j, TERRAIN)):
-						chunks.data[chunk].data[Vector3(i, j, TERRAIN)] = WATER
-		
+	for i in range(map_size):
+		for j in range(map_size):
+			if noise.get_noise_2d(i, j) - _get_falloff_value(i, j) > LAND_THRESHOLD:
+				
+				chunks.data[Vector3(i, j, TERRAIN)] = LAND
+				
+				# Set the nearby cells to LAND to avoid bitmask problems.
+				# The returned array from the range function will not include
+				# the second argument, so it is "i(j) + 2" here.
+				for m in range(i - 1, i + 2):
+					for n in range(j - 1, j + 2):
+						if (m >= 0 and m <= map_size - 1) and (n >= 0 and n <= map_size - 1):
+							chunks.data[Vector3(m, n, TERRAIN)] = LAND
+			else:
+				if not chunks.data.has(Vector3(i, j, TERRAIN)):
+					chunks.data[Vector3(i, j, TERRAIN)] = WATER
+	
 	# Post process the map
 	# First to remove the cells of wrong bitmasks
 	var template1 = [
@@ -85,10 +79,7 @@ func generate(chunks):
 
 	for i in range(map_size):
 		for j in range(map_size):
-			var chunk_position = Vector2(floor(i / CHUNK_SIZE), floor(j / CHUNK_SIZE))
-			_map_cache[i][j] = chunks.data[chunk_position].data[Vector3(
-					i - CHUNK_SIZE * chunk_position.x,
-					j - CHUNK_SIZE * chunk_position.y, TERRAIN)]
+			_map_cache[i][j] = chunks.data[Vector3(i, j, TERRAIN)]
 
 	# The edge of the map must be WATER, so we don't need to care about them
 	for i in range(1, map_size - 1):
@@ -102,9 +93,7 @@ func generate(chunks):
 					nearby.hash() == template2.hash()):
 				for m in range(i - 1, i + 2):
 					for n in range(j - 1, j + 2):
-						var chunk_position = Vector2(floor(m / CHUNK_SIZE), floor(n / CHUNK_SIZE))
-						chunks.data[chunk_position].set_cell(m - CHUNK_SIZE * chunk_position.x,
-								n - CHUNK_SIZE * chunk_position.y, TERRAIN, LAND)
+						chunks.set_cell(m, n, TERRAIN, LAND)
 	return OK
 
 

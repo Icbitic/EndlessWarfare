@@ -56,21 +56,21 @@ func _exit_tree():
 func draw_cell(x, y, z, update_bitmask = true):
 	match z:
 		TERRAIN:
-			$Terrain.set_cell(x, y, get_cell(x, y, z))
+			$Terrain.set_cell(x, y, get_cellf(x, y, z))
 			if update_bitmask:
 				$Terrain.update_bitmask_region()
 			return OK
 		PATH:
-			$Path.set_cell(x, y, get_cell(x, y, z))
+			$Path.set_cell(x, y, get_cellf(x, y, z))
 			return OK
 		FLOOR:
-			$Floor.set_cell(x, y, get_cell(x, y, z))
+			$Floor.set_cell(x, y, get_cellf(x, y, z))
 			return OK
 		FENCE:
-			$Fence.set_cell(x, y, get_cell(x, y, z))
+			$Fence.set_cell(x, y, get_cellf(x, y, z))
 			return OK
 		WALL:
-			$Wall.set_cell(x, y, get_cell(x, y, z))
+			$Wall.set_cell(x, y, get_cellf(x, y, z))
 			return OK
 		_:
 			return ERR_DOES_NOT_EXIST
@@ -81,13 +81,12 @@ func draw_chunks(update = false):
 		for j in range(map_size):
 			draw_cell(i, j, TERRAIN, update)
 	
-	for chunk in chunks.data.keys():
-		for position in chunks.data[chunk].data.keys():
-			draw_cell(position.x + chunks.data[chunk].chunk_position.x * CHUNK_SIZE,
-					position.y + chunks.data[chunk].chunk_position.y * CHUNK_SIZE,
-					position.z)
+	for position in chunks.data.keys():
+		if position.z == TERRAIN:
+			continue
+		draw_cell(position.x, position.y, position.z, update)
 	return OK
-	
+
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var result = chunks.set_cell(x, y, z, tile, update_bitmask)
 	draw_cell(x, y, z, update_bitmask)
@@ -107,18 +106,6 @@ func generate(size):
 	
 	chunks.map_size = size
 	chunks.data = {}
-	
-	# If map_size / CHUNK_SIZE cannot be a integer
-	# Use the closest integer smaller than it instead
-	# warning-ignore:integer_division
-	for i in range(size / CHUNK_SIZE):
-		# warning-ignore:integer_division
-		for j in range(size / CHUNK_SIZE):
-			var _chunk = Chunk.new()
-			var _chunk_position = Vector2(i, j)
-			_chunk.chunk_position = _chunk_position
-			chunks.data[_chunk_position] = _chunk
-			$Chunks.add_child(_chunk)
 	
 	chunks.generate()
 	

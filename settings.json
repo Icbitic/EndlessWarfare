@@ -2,6 +2,7 @@
     "version": "0.2.1",
     "echo_recordings": true,
     "restore_logs_to_memory": false,
+    "logs_in_milliseconds": false,
     "record_navigation_details": false,
     "enable_test_set": true,
     "draw_chunk_outline": false,

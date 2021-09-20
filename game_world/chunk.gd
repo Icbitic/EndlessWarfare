@@ -54,7 +54,7 @@ func _ready():
 
 func set_cell(x, y, z, tile):
 	if data.has(Vector3(x, y, z)):
-		data[Vector3(x, y, z)] = tile
+		
 		return OK
 	else:
 		return ERR_DOES_NOT_EXIST

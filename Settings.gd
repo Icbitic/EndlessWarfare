@@ -7,6 +7,7 @@ var map_size = 256
 
 var echo_recordings = true
 var restore_logs_to_memory = false
+var logs_in_milliseconds = false
 var record_navigation_details = false
 var enable_test_set = false
 var draw_chunk_outline = false
