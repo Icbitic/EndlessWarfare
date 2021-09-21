@@ -77,14 +77,12 @@ func draw_cell(x, y, z, update_bitmask = true):
 			
 
 func draw_chunks(update = false):
-	for i in range(map_size):
-		for j in range(map_size):
-			draw_cell(i, j, TERRAIN, update)
-	
 	for position in chunks.data.keys():
+		# Due to a bug for an unknow reason
 		if position.z == TERRAIN:
-			continue
-		draw_cell(position.x, position.y, position.z, update)
+			draw_cell(position.x, position.y, TERRAIN, update)
+		else:
+			draw_cell(position.x, position.y, position.z, update)
 	return OK
 
 func set_cell(x, y, z, tile, update_bitmask = true):

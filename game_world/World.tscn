@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://game_world/World.gd" type="Script" id=1]
 [ext_resource path="res://game_world/map/plane_map.gd" type="Script" id=2]
@@ -9,6 +9,8 @@
 [ext_resource path="res://game_world/map/Wall.gd" type="Script" id=7]
 [ext_resource path="res://game_world/map/Terrain.gd" type="Script" id=8]
 [ext_resource path="res://game_world/Camera2D.gd" type="Script" id=9]
+
+[sub_resource type="ShaderMaterial" id=3]
 
 [sub_resource type="TileSet" id=1]
 0/name = "Tiles.png 0"
@@ -58,6 +60,7 @@ script = ExtResource( 3 )
 [node name="Navigation" parent="Map" instance=ExtResource( 6 )]
 
 [node name="Terrain" type="TileMap" parent="Map"]
+material = SubResource( 3 )
 tile_set = SubResource( 1 )
 cell_size = Vector2( 8, 8 )
 format = 1
