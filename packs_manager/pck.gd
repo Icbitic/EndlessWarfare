@@ -34,5 +34,5 @@ func check_compatibility():
 					res = true
 			return res
 		_:
-			LogRecorder.record("Unknow type of version_support", 1)
+			Logger.record("Unknow type of version_support", 1)
 			return ERR_DOES_NOT_EXIST

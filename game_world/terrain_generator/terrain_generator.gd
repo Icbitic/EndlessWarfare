@@ -40,18 +40,16 @@ func generate(chunks):
 		for j in range(map_size):
 			if noise.get_noise_2d(i, j) - _get_falloff_value(i, j) > LAND_THRESHOLD:
 				
-				chunks.data[Vector3(i, j, TERRAIN)] = LAND
-				
 				# Set the nearby cells to LAND to avoid bitmask problems.
 				# The returned array from the range function will not include
 				# the second argument, so it is "i(j) + 2" here.
 				for m in range(i - 1, i + 2):
 					for n in range(j - 1, j + 2):
 						if (m >= 0 and m <= map_size - 1) and (n >= 0 and n <= map_size - 1):
-							chunks.data[Vector3(m, n, TERRAIN)] = LAND
+							chunks.set_cell(m, n, TERRAIN, LAND)
 			else:
-				if not chunks.data.has(Vector3(i, j, TERRAIN)):
-					chunks.data[Vector3(i, j, TERRAIN)] = WATER
+				if not chunks.get_cell(i, j, TERRAIN) == LAND:
+					chunks.set_cell(i, j, TERRAIN, WATER)
 	
 	# Post process the map
 	# First to remove the cells of wrong bitmasks
@@ -79,7 +77,7 @@ func generate(chunks):
 
 	for i in range(map_size):
 		for j in range(map_size):
-			_map_cache[i][j] = chunks.data[Vector3(i, j, TERRAIN)]
+			_map_cache[i][j] = chunks.get_cell(i, j, TERRAIN)
 
 	# The edge of the map must be WATER, so we don't need to care about them
 	for i in range(1, map_size - 1):

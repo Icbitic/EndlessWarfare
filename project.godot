@@ -56,8 +56,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-LogRecorder="*res://LogRecorder.gd"
 Settings="*res://Settings.gd"
+Logger="*res://Logger.gd"
 
 [importer_defaults]
 
