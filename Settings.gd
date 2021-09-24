@@ -29,4 +29,4 @@ func _ready():
 		# Todo: Find out a way to make mod able to add some settings here.
 		
 	else:
-		Logger.record("Unable to load res://info.json")
+		Logger.info("Unable to load res://info.json")

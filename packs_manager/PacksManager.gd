@@ -29,12 +29,12 @@ func _search_packs(path, intended = false):
 						if (file.open(dir.get_current_dir() + "//info.json", File.READ)) == OK:
 							info = parse_json(file.get_as_text())
 						else:
-							Logger.record("Unable to load" + dir.get_current_dir() + "//info.json")
+							Logger.info("Unable to load" + dir.get_current_dir() + "//info.json")
 						
 						
 						if not ProjectSettings.load_resource_pack(dir.get_current_dir()
 								+ "//" + file_name):
-							Logger.record("Error occurred when trying to load " + dir.get_current_dir()+ "/" + file_name, 1)
+							Logger.error("Error occurred when trying to load " + dir.get_current_dir()+ "/" + file_name, ERR_CANT_RESOLVE)
 							break
 						
 						var scene = load("res://" + info.name + "//" + info.name + ".tscn")
@@ -47,11 +47,11 @@ func _search_packs(path, intended = false):
 						var package = Pack.new()
 						package.setup_data(pack_data)
 						packs[pack_data.name] = package
-						Logger.record(str(pack_data.name) + " is loaded successfully.")
+						Logger.info(str(pack_data.name) + " is loaded successfully.")
 						
 			file_name = dir.get_next()
 	else:
-		Logger.record(path + " is missing")
+		Logger.info(path + " is missing")
 		return ERR_DOES_NOT_EXIST
 	dir.list_dir_end()
 	return OK

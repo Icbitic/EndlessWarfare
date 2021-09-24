@@ -29,7 +29,7 @@ func _ready():
 	#thread.start(self, "generate")
 	player = world.get_node("Players/" + str(world.player_id))
 	
-	Logger.record("Game world objects are linked to the Map node.")
+	Logger.info("Game world objects are linked to the Map node.")
 	
 	# Todo: check if there is a existing saven
 	
@@ -39,21 +39,21 @@ func _ready():
 	
 	generate(map_size)
 	
-	Logger.record("Starting drawing the data from chunks to the Tilemaps.")
+	Logger.info("Starting drawing the data from chunks to the Tilemaps.")
 	var initial_time = OS.get_ticks_msec()
 	var initial_memory_usage = OS.get_static_memory_peak_usage()
 	
 	draw_chunks(false)
-	Logger.record("The data from Chunks were drawn into Tilemaps.")
+	Logger.info("The data from Chunks were drawn into Tilemaps.")
 	
 	$Terrain.update_bitmask_region()
-	Logger.record("Terrain's bitmask is updated.")
+	Logger.info("Terrain's bitmask is updated.")
 	
 	var final_time = OS.get_ticks_msec()
 	var final_memory_usage = OS.get_static_memory_peak_usage()
-	Logger.record("Finished drawing the data from chunks to the Tilemaps in " +
+	Logger.info("Finished drawing the data from chunks to the Tilemaps in " +
 			str(((final_time as float) - (initial_time as float)) / 1000) + "s.")
-	Logger.record("The memory usage when drawing the "+ str(map_size) + "x map to Tilemaps is "
+	Logger.info("The memory usage when drawing the "+ str(map_size) + "x map to Tilemaps is "
 			+ str(((final_memory_usage as float) - (initial_memory_usage as float)) / 1048576)
 			+ " MB.")
 	
@@ -104,7 +104,7 @@ func get_cell(x, y, z):
 	return chunks.get_cell(x, y, z)
 
 func generate(size):
-	Logger.record("Starting generating the map.")
+	Logger.info("Starting generating the map.")
 	var initial_time = OS.get_ticks_msec()
 	var initial_memory_usage = OS.get_static_memory_peak_usage()
 	
@@ -114,9 +114,9 @@ func generate(size):
 	
 	var final_time = OS.get_ticks_msec()
 	var final_memory_usage = OS.get_static_memory_peak_usage()
-	Logger.record("Finished generating a(n) "+ str(size) + "x map in " +
+	Logger.info("Finished generating a(n) "+ str(size) + "x map in " +
 			str(((final_time as float) - (initial_time as float)) / 1000) + "s.")
-	Logger.record("The memory usage of the "+ str(size) + "x map's data is " + 
+	Logger.info("The memory usage of the "+ str(size) + "x map's data is " + 
 			str(((final_memory_usage as float) - (initial_memory_usage as float)) / 1048576)
 			+ " MB.")
 	return OK

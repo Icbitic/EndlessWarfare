@@ -11,7 +11,7 @@ var _data = {}
 var _terrian = []
 
 func setup(size):
-	Logger.record("Chunks of a " + str(size) + "x map was set up.")
+	Logger.info("Chunks of a " + str(size) + "x map was set up.")
 	map_size = size
 	# Initialize the terrian array
 	# Since the terrian cells can fill the map, so use an array to store them.
