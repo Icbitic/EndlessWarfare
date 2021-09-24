@@ -22,7 +22,7 @@ _global_script_classes=[ {
 "base": "Node2D",
 "class": "Database",
 "language": "GDScript",
-"path": "res://game_world/Database.gd"
+"path": "res://game_world/database.gd"
 }, {
 "base": "Node",
 "class": "Pack",
@@ -51,13 +51,13 @@ _global_script_class_icons={
 [application]
 
 config/name="Endless Warfare"
-run/main_scene="res://Main.tscn"
+run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Settings="*res://Settings.gd"
-Logger="*res://Logger.gd"
+Settings="*res://settings.gd"
+Logger="*res://logger.gd"
 
 [importer_defaults]
 
