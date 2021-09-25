@@ -8,7 +8,7 @@
 [ext_resource path="res://game_world/navigation.tscn" type="PackedScene" id=6]
 [ext_resource path="res://game_world/map/wall.gd" type="Script" id=7]
 [ext_resource path="res://game_world/map/terrain.gd" type="Script" id=8]
-[ext_resource path="res://game_world/camera2d.gd" type="Script" id=9]
+[ext_resource path="res://game_world/camera.tscn" type="PackedScene" id=9]
 
 [sub_resource type="TileSet" id=1]
 0/name = "Tiles.png 0"
@@ -84,11 +84,4 @@ script = ExtResource( 7 )
 [node name="0" type="Node2D" parent="Players"]
 script = ExtResource( 5 )
 
-[node name="Camera2D" type="Camera2D" parent="Players/0"]
-offset = Vector2( 1024, 1024 )
-current = true
-zoom = Vector2( 0.5, 0.5 )
-smoothing_enabled = true
-script = ExtResource( 9 )
-
-[node name="Tween" type="Tween" parent="Players/0/Camera2D"]
+[node name="Camera2D" parent="Players/0" instance=ExtResource( 9 )]
