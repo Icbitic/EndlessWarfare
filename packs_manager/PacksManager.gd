@@ -7,10 +7,22 @@ var packs = {}
 func load_packs(path):
 	# Don't send res:// here
 	return _search_packs(path)
-	
+
+func load_off():
+	Logger.info("All packs are loaded off.")
+	var amount = packs.size()
+	packs = {}
+	return amount
+
 func get_packs():
 	return packs
-	
+
+func list_mods():
+	var s = "Mods loaded: "
+	for i in packs.keys():
+		s += i + ", "
+	s.erase(s.length() - 2, 2)
+	return s
 # Privare Methods
 func _search_packs(path, intended = false):
 	var dir = Directory.new()

@@ -24,6 +24,48 @@ func _ready():
 	$Wall.GlobalNavigation = $Navigation
 	$Terrain.GlobalNavigation = $Navigation
 	
+	Console.add_command("setterrain", self, "setterrain_cmd")\
+	.set_description("Set terrain.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setpath", self, "setpath_cmd")\
+	.set_description("Set path.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setfloor", self, "setfloor_cmd")\
+	.set_description("Set floor.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setfence", self, "setfence_cmd")\
+	.set_description("Set fence.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setwall", self, "setwall_cmd")\
+	.set_description("Set wall.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setcell", self, "setcell_cmd")\
+	.set_description("Set cell.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("pos_z", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
 	
 	#thread = Thread.new()
 	#thread.start(self, "generate")
@@ -67,7 +109,7 @@ func draw_cell(x, y, z, update_bitmask = true):
 		TERRAIN:
 			$Terrain.set_cell(x, y, get_cell(x, y, TERRAIN))
 			if update_bitmask:
-				$Terrain.update_bitmask_region()
+				$Terrain.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
 			return OK
 		PATH:
 			$Path.set_cell(x, y, get_cell(x, y, PATH))
@@ -92,6 +134,30 @@ func draw_chunks(update_bitmask = false):
 		for j in range(chunks.map_size):
 			draw_cell(i, j, TERRAIN, update_bitmask)
 	return OK
+
+func setterrain_cmd(x, y, tile):
+	set_cell(x, y, TERRAIN, tile)
+	Console.write_line("Terrain set at (" + str(x) + " " + str(y) + ")")
+
+func setpath_cmd(x, y, tile):
+	set_cell(x, y, PATH, tile)
+	Console.write_line("Path set at (" + str(x) + ", " + str(y) + ")")
+	
+func setfloor_cmd(x, y, tile):
+	set_cell(x, y, FLOOR, tile)
+	Console.write_line("Floor set at (" + str(x) + ", " + str(y) + ")")
+	
+func setfence_cmd(x, y, tile):
+	set_cell(x, y, FENCE, tile)
+	Console.write_line("Fence set at (" + str(x) + ", " + str(y) + ")")
+	
+func setwall_cmd(x, y, tile):
+	set_cell(x, y, WALL, tile)
+	Console.write_line("Wall set at (" + str(x) + ", " + str(y) + ")")
+	
+func setcell_cmd(x, y, z, tile):
+	set_cell(x, y, z, tile)
+	Console.write_line("Cell set at (" + str(x) + ", " + str(y) + ")")
 
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var result = chunks.set_cell(x, y, z, tile)

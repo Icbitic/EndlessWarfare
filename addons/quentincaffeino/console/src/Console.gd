@@ -94,6 +94,8 @@ func _ready():
 func _input(e):
 	if Input.is_action_just_pressed(DefaultActions.CONSOLE_TOGGLE):
 		self.toggle_console()
+	if Input.is_action_just_pressed("ui_cancel") and is_console_shown:
+		self.toggle_console()
 
 
 # @returns  Command/CommandService
@@ -147,8 +149,10 @@ func write_line(message = ''):
 	message = str(message)
 	if self.Text:
 		self.Text.set_bbcode(self.Text.get_bbcode() + message + '\n')
+		
+		if not message.match("*[*]*[*]*"):
+			Logger.info(message)
 	#print(self._erase_bb_tags_regex.sub(message, '', true))
-
 
 # @returns  void
 func clear():

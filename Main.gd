@@ -7,10 +7,34 @@ func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
-	Logger.info("Starting loading mods.")
+	load_mods()
 	
+	Console.add_command("loadmods", self, "load_mods_cmd")\
+	.set_description("Load .pck files in mods folder.")\
+	.register()
+	
+	Console.add_command("loadoff", self, "load_off_cmd")\
+	.set_description("Load off all .pck files.")\
+	.register()
+	
+	Console.add_command("listmods", self, "list_mods_cmd")\
+	.set_description("Load off all .pck files.")\
+	.register()
+	
+	map = map.instance()
+	add_child(map)
+	
+	# Test the game functions to check if they are OK. 
+	$Test.test()
+	
+	
+func load_mods_cmd():
+	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
+	
+func load_mods():
+	Logger.info("Starting loading mods.")
 	if $PacksManager.load_packs("mods") == OK:
-		Logger.info(str($PacksManager.get_packs().size()) + " mod(s) loaded successfully.")
+		Logger.info(str($PacksManager.get_packs().size()) + " mod(s) are loaded successfully.")
 		packs = $PacksManager.get_packs()
 		
 		for i in packs.keys():
@@ -22,12 +46,14 @@ func _ready():
 				self.add_child(node)
 				Logger.info("Mod actived: " + packs[i].get_data().name + ".")
 	
-	map = map.instance()
-	add_child(map)
-	
-	# Test the game functions to check if they are OK. 
-	$Test.test()
-	
-# Public Methods
+	# Return the amount of mods.
+	return $PacksManager.get_packs().size()
 
-# Private Methods
+func load_off_cmd():
+	Console.write_line(str(load_off()) + " mod(s) are loaded off.")
+
+func load_off():
+	return $PacksManager.load_off()
+	
+func list_mods_cmd():
+	Console.write_line($PacksManager.list_mods())
