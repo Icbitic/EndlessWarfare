@@ -13,12 +13,9 @@ const WORLD_HEIGHT = 5
 
 var map_size
 
-var player
 var thread
 
 var chunks: Chunks
-
-onready var world = get_parent()
 
 func _ready():
 	$Wall.GlobalNavigation = $Navigation
@@ -69,7 +66,6 @@ func _ready():
 	
 	#thread = Thread.new()
 	#thread.start(self, "generate")
-	player = world.get_node("Players/" + str(world.player_id))
 	
 	Logger.info("Game world objects are linked to the Map node.")
 	
