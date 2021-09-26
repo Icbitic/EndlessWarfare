@@ -18,11 +18,15 @@ func get_packs():
 	return packs
 
 func list_mods():
-	var s = "Mods loaded: "
-	for i in packs.keys():
-		s += i + ", "
-	s.erase(s.length() - 2, 2)
-	return s
+	if not packs.keys().size() == 0:
+		var s = "Mods loaded: "
+		for i in packs.keys():
+			s += i + ", "
+		s.erase(s.length() - 2, 2)
+		return s
+	else:
+		return "No mods were loaded."
+
 # Privare Methods
 func _search_packs(path, intended = false):
 	var dir = Directory.new()
@@ -42,7 +46,6 @@ func _search_packs(path, intended = false):
 							info = parse_json(file.get_as_text())
 						else:
 							Logger.info("Unable to load" + dir.get_current_dir() + "//info.json")
-						
 						
 						if not ProjectSettings.load_resource_pack(dir.get_current_dir()
 								+ "//" + file_name):

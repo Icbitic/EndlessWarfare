@@ -150,8 +150,6 @@ func write_line(message = ''):
 	if self.Text:
 		self.Text.set_bbcode(self.Text.get_bbcode() + message + '\n')
 		
-		if not message.match("*[*]*[*]*"):
-			Logger.info(message)
 	#print(self._erase_bb_tags_regex.sub(message, '', true))
 
 # @returns  void
