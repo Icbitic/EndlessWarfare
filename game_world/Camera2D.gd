@@ -50,6 +50,7 @@ func _process(delta):
 	Tween.TRANS_LINEAR, Tween.EASE_OUT_IN)
 	$Tween.start()
 
+# warning-ignore:unused_argument
 func _unhandled_input(event):
 	if Input.is_action_pressed("ui_right"):
 		input.ui_right = true
