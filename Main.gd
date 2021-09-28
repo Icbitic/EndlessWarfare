@@ -38,13 +38,18 @@ func load_mods():
 		packs = $PacksManager.get_packs()
 		
 		for i in packs.keys():
-			if packs[i].check_compatibility() == false:
+			if Settings.check_compatibility(packs[i].version_support) == false:
 				Logger.warn("Warning! " + packs[i].name + " is not compatible with this version")
 			# Todo: put an enable option condition here
-			else:
-				var node = packs[i].get_data().scene.instance()
+			elif packs[i].is_enabled:
+				if not ProjectSettings.load_resource_pack(packs[i].path):
+					Logger.error("Error occurred when trying to load " + packs[i].path, ERR_CANT_RESOLVE)
+					break
+				var scene = load("res://" + packs[i].name + "//" + packs[i].name + ".tscn")
+				packs[i].scene = scene
+				var node = scene.instance()
 				self.add_child(node)
-				Logger.info("Mod actived: " + packs[i].get_data().name + ".")
+				Logger.info("Mod actived: " + packs[i].name + ".")
 	
 	# Return the amount of mods.
 	return $PacksManager.get_packs().size()

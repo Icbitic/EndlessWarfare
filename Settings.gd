@@ -30,3 +30,17 @@ func _ready():
 		
 	else:
 		Logger.info("Unable to load res://info.json")
+
+func check_compatibility(version_support):
+	match typeof(version_support):
+		TYPE_STRING:
+			return version.match(version_support)
+		TYPE_ARRAY:
+			var res = false
+			for i in version_support:
+				if version.match(i):
+					res = true
+			return res
+		_:
+			Logger.info("Unknow type of version_support", 1)
+			return ERR_DOES_NOT_EXIST
