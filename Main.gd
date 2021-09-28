@@ -45,7 +45,7 @@ func load_mods():
 				if not ProjectSettings.load_resource_pack(packs[i].path):
 					Logger.error("Error occurred when trying to load " + packs[i].path, ERR_CANT_RESOLVE)
 					break
-				var scene = load("res://" + packs[i].name + "//" + packs[i].name + ".tscn")
+				var scene = load("res://" + packs[i].name + "/" + packs[i].name + ".tscn")
 				packs[i].scene = scene
 				var node = scene.instance()
 				self.add_child(node)
