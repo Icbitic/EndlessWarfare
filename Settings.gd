@@ -2,7 +2,6 @@ extends Node
 
 var version = "0.2.1"
 
-# The map_size should be greater than 96
 var map_size = 256
 
 var echo_recordings = true
@@ -16,16 +15,10 @@ var draw_cell_outline = false
 func _ready():
 	var file = File.new()
 	if (file.open("res://settings.json", File.READ)) == OK:
-		var settings = parse_json(file.get_as_text())
+		var settings: Dictionary = parse_json(file.get_as_text())
 		
-		# Set the settings
-		echo_recordings = settings.echo_recordings
-		restore_logs_to_memory = settings.restore_logs_to_memory
-		record_navigation_details = settings.record_navigation_details
-		enable_test_set = settings.enable_test_set
-		draw_chunk_outline = settings.draw_chunk_outline
-		draw_cell_outline = settings.draw_cell_outline
-		
+		for i in settings.keys():
+			set(i, settings[i])
 		# Todo: Find out a way to make mod able to add some settings here.
 		
 	else:

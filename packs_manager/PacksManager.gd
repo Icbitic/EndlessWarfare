@@ -45,24 +45,24 @@ func _search_packs(path, intended = false):
 		while file_name != "":
 			if dir.current_is_dir() and !intended:
 				pass
-				_search_packs(path + "/" + file_name, true)
+				_search_packs(path.plus_file(file_name), true)
 			else:
 				if file_name.match("*.pck"):
 					if dir.get_current_dir() != path:
 						var file = File.new()
 						var info
-						if (file.open(dir.get_current_dir() + "/info.json", File.READ)) == OK:
+						if (file.open(dir.get_current_dir().plus_file("info.json"), File.READ)) == OK:
 							info = parse_json(file.get_as_text())
 							if not info.has_all(pack_data_template):
-								Logger.error(dir.get_current_dir() + "/info.json doesn't match the template.")
+								Logger.error(dir.get_current_dir().plus_file("info.json") + " doesn't match the template.")
 								return ERR_FILE_NOT_FOUND
 						else:
-							Logger.info("Unable to load" + dir.get_current_dir() + "/info.json")
+							Logger.info("Unable to load" + dir.get_current_dir().plus_file("info.json"))
 						
 						
 						
 						var pack_data = {
-							"path": dir.get_current_dir()+ "/" + file_name,
+							"path": dir.get_current_dir().plus_file(file_name),
 							"scene": null,
 							"name": info.name,
 							"version": info.version,

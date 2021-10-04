@@ -16,11 +16,41 @@ var map_size
 var thread
 
 var chunks: Chunks
+var chunks_data: Dictionary setget set_chunks_data
 
-func _ready():
+var is_generated = false
+
+func _exit_tree():
+	if thread != null:
+		thread.wat_to_finish()
+
+func exit_loading():
+	remove_commands()
+
+func setup():
 	$Wall.GlobalNavigation = $Navigation
 	$Terrain.GlobalNavigation = $Navigation
 	
+	Logger.info("Game world objects are linked to the Map node.")
+	
+	add_commands()
+	
+	if not is_generated:
+		map_size = Settings.map_size
+		
+		# Todo: use thread to generate chunks.
+		#thread = Thread.new()
+		#thread.start(self, "generate")
+		
+		chunks = Chunks.new()
+		chunks.setup(map_size)
+		generate(map_size)
+		
+		is_generated = true
+	
+	update_tilemap()
+
+func add_commands():
 	Console.add_command("setterrain", self, "setterrain_cmd")\
 	.set_description("Set terrain.")\
 	.add_argument("pos_x", TYPE_INT)\
@@ -64,24 +94,40 @@ func _ready():
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	#thread = Thread.new()
-	#thread.start(self, "generate")
+func remove_commands():
+	Console.remove_command("setterrain")
+	Console.remove_command("setpath")
+	Console.remove_command("setfloor")
+	Console.remove_command("setfence")
+	Console.remove_command("setwall")
+	Console.remove_command("setcell")
 	
-	Logger.info("Game world objects are linked to the Map node.")
-	
-	# Todo: check if there is a existing saven
-	
+func save():
+	var save_dict = {
+		"filename": get_filename(),
+		"parent" : get_parent().get_path(),
+		"chunks_data": chunks.save(),
+		"map_size": map_size,
+		"is_generated": is_generated
+	}
+	return save_dict
+
+func set_chunks_data(value: Dictionary):
+	chunks = null
 	chunks = Chunks.new()
-	map_size = Settings.map_size
-	chunks.setup(map_size)
-	
-	generate(map_size)
-	
+	chunks.setup(value.map_size)
+	for i in value.keys():
+		if i == "map_size":
+			continue
+		chunks.set(i, value[i])
+	chunks_data = value
+
+func update_tilemap():
 	Logger.info("Starting drawing the data from chunks to the Tilemaps.")
 	var initial_time = OS.get_ticks_msec()
 	var initial_memory_usage = OS.get_static_memory_peak_usage()
 	
-	draw_chunks(false)
+	_draw_chunks(false)
 	Logger.info("The data from Chunks were drawn into Tilemaps.")
 	
 	$Terrain.update_bitmask_region()
@@ -92,44 +138,7 @@ func _ready():
 	Logger.info("Finished drawing the data from chunks to the Tilemaps in " +
 			str(((final_time as float) - (initial_time as float)) / 1000) + "s.")
 	Logger.info("The memory usage when drawing the "+ str(map_size) + "x map to Tilemaps is "
-			+ str(((final_memory_usage as float) - (initial_memory_usage as float)) / 1048576)
-			+ " MB.")
-	
-	
-func _exit_tree():
-	if thread != null:
-		thread.wait_to_finish()
-
-func draw_cell(x, y, z, update_bitmask = true):
-	match z:
-		TERRAIN:
-			$Terrain.set_cell(x, y, get_cell(x, y, TERRAIN))
-			if update_bitmask:
-				$Terrain.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
-			return OK
-		PATH:
-			$Path.set_cell(x, y, get_cell(x, y, PATH))
-			return OK
-		FLOOR:
-			$Floor.set_cell(x, y, get_cell(x, y, FLOOR))
-			return OK
-		FENCE:
-			$Fence.set_cell(x, y, get_cell(x, y, FENCE))
-			return OK
-		WALL:
-			$Wall.set_cell(x, y, get_cell(x, y, WALL))
-			return OK
-		_:
-			return ERR_DOES_NOT_EXIST
-			
-
-func draw_chunks(update_bitmask = false):
-	for position in chunks.get_all_cells().keys():
-		draw_cell(position.x, position.y, position.z, update_bitmask)
-	for i in range(chunks.map_size):
-		for j in range(chunks.map_size):
-			draw_cell(i, j, TERRAIN, update_bitmask)
-	return OK
+			+ String.humanize_size(final_memory_usage - initial_memory_usage))
 
 func setterrain_cmd(x, y, tile):
 	set_cell(x, y, TERRAIN, tile)
@@ -157,7 +166,7 @@ func setcell_cmd(x, y, z, tile):
 
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var result = chunks.set_cell(x, y, z, tile)
-	draw_cell(x, y, z, update_bitmask)
+	_draw_cell(x, y, z, update_bitmask)
 	return result
 
 # This method does not check if the key exists in chunks
@@ -170,8 +179,6 @@ func generate(size):
 	var initial_time = OS.get_ticks_msec()
 	var initial_memory_usage = OS.get_static_memory_peak_usage()
 	
-	chunks.map_size = size
-	
 	chunks.generate()
 	
 	var final_time = OS.get_ticks_msec()
@@ -179,6 +186,37 @@ func generate(size):
 	Logger.info("Finished generating a(n) "+ str(size) + "x map in " +
 			str(((final_time as float) - (initial_time as float)) / 1000) + "s.")
 	Logger.info("The memory usage of the "+ str(size) + "x map's data is " + 
-			str(((final_memory_usage as float) - (initial_memory_usage as float)) / 1048576)
-			+ " MB.")
+			String.humanize_size(final_memory_usage - initial_memory_usage))
+	return OK
+	
+	
+func _draw_cell(x, y, z, update_bitmask = true):
+	match z:
+		TERRAIN:
+			$Terrain.set_cell(x, y, get_cell(x, y, TERRAIN))
+			if update_bitmask:
+				$Terrain.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+			return OK
+		PATH:
+			$Path.set_cell(x, y, get_cell(x, y, PATH))
+			return OK
+		FLOOR:
+			$Floor.set_cell(x, y, get_cell(x, y, FLOOR))
+			return OK
+		FENCE:
+			$Fence.set_cell(x, y, get_cell(x, y, FENCE))
+			return OK
+		WALL:
+			$Wall.set_cell(x, y, get_cell(x, y, WALL))
+			return OK
+		_:
+			return ERR_DOES_NOT_EXIST
+			
+
+func _draw_chunks(update_bitmask = false):
+	for position in chunks.get_all_cells().keys():
+		_draw_cell(position.x, position.y, position.z, update_bitmask)
+	for i in range(chunks.map_size):
+		for j in range(chunks.map_size):
+			_draw_cell(i, j, TERRAIN, update_bitmask)
 	return OK
