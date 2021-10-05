@@ -4,6 +4,8 @@ var version = "0.2.1"
 
 var map_size = 256
 
+var saven_path = "user://test_saven"
+
 var echo_recordings = true
 var restore_logs_to_memory = false
 var logs_in_milliseconds = false

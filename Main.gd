@@ -3,6 +3,12 @@ extends Node2D
 var packs
 var world = preload("res://game_world/world.tscn")
 
+const ignore_data = [
+	"filename", "parent",
+	"pos_x", "pos_y",
+	"is_generated"
+	]
+
 func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
@@ -37,83 +43,112 @@ func _ready():
 	# Test the game functions to check if they are OK. 
 	$Test.test()
 	
-# Note: This can be called from anywhere inside the tree. This function
-# is path independent.
-func load_game():
-	Logger.info("Loading game from " + "user://savegame.save")
+func load_file(path):
+	Logger.info("Loading game data from " + path)
 	var save_game = File.new()
-	if not save_game.file_exists("user://savegame.save"):
+	if not save_game.file_exists(path):
 		return ERR_DOES_NOT_EXIST# Error! We don't have a save to load.
 
-	# We need to revert the game state so we're not cloning objects
-	# during loading. This will vary wildly depending on the needs of a
-	# project, so take care with this step.
-	# For our example, we will accomplish this by deleting saveable objects.
-	var save_nodes = get_tree().get_nodes_in_group("Persist")
-	for i in save_nodes:
-		if i.has_method("exit_loading"):
-			i.exit_loading()
-		i.queue_free()
-		yield(i, "tree_exited")
 	
 	# Load the file line by line and process that dictionary to restore
 	# the object it represents.
-	var res = save_game.open("user://savegame.save", File.READ)
+	var res = save_game.open(path, File.READ)
 	while save_game.get_position() < save_game.get_len():
 		# Get the saved dictionary from the next line in the save file
 		var node_data: Dictionary = parse_json(save_game.get_line())
 
 		# Firstly, we need to create the object and add it to the tree and set its position.
-		var new_object: Node = load(node_data["filename"]).instance()
+		var new_object: Node = load(node_data.ori["filename"]).instance()
+		get_node(node_data.ori["parent"]).add_child(new_object)
 		
-		if node_data.has("pos_x") and node_data.has("pos_y"):
-			new_object.position = Vector2(node_data["pos_x"], node_data["pos_y"])
-			
-		if node_data.has("is_generated"):
-			new_object.is_generated = node_data.is_generated
-			
-		get_node(node_data["parent"]).add_child(new_object)
-			
-		# Now we set the remaining variables.
 		for i in node_data.keys():
-			if i == "filename" or i == "parent" or i == "pos_x" or i == "pos_y" or i == "is_generated":
+			if i == "ori":
+				if node_data[i].has("pos_x") and node_data[i].has("pos_y"):
+					new_object.position = Vector2(node_data[i]["pos_x"], node_data[i]["pos_y"])
+					
+				if node_data[i].has("is_generated"):
+					new_object.is_generated = node_data[i].is_generated
+					
+				# Now we set the remaining variables.
+				for j in node_data[i].keys():
+					if ignore_data.has(i):
+						continue
+					new_object.set(j, node_data[i][j])
+					
+				if new_object.has_method("setup"):
+					
+					new_object.call("setup")
+					
 				continue
-			new_object.set(i, node_data[i])
+				
+			if node_data[i].has("pos_x") and node_data[i].has("pos_y"):
+				get_node(i).position = Vector2(node_data[i]["pos_x"], node_data[i]["pos_y"])
+				
+			if node_data[i].has("is_generated"):
+				get_node(i).is_generated = node_data[i].is_generated
+				
+			# Now we set the remaining variables.
+			for j in node_data[i].keys():
+				if ignore_data.has(i):
+					continue
+				get_node(i).set(j, node_data[i][j])
 			
-		if new_object.has_method("setup"):
-			new_object.call("setup")
+			if get_node(i).has_method("setup"):
+				get_node(i).call("setup")
 		
 
 	save_game.close()
-	Logger.info("Game was loaded from " + "user://savegame.save")
+	Logger.info("Game data was loaded from " + path)
 
+	
+# Note: This can be called from anywhere inside the tree. This function
+# is path independent.
+func load_game():
+	# We need to revert the game state so we're not cloning objects
+	# during loading. This will vary wildly depending on the needs of a
+	# project, so take care with this step.
+	# For our example, we will accomplish this by deleting saveable objects.
+	var save_nodes = get_tree().get_nodes_in_group("Persist")
+		
+	for i in save_nodes:
+		if i.has_method("exit_loading"):
+			i.exit_loading()
+		i.queue_free()
+		yield(i, "tree_exited")
+		
+	for i in _search_savens("user://test_saven"):
+		load_file(i)
+		
+		
+func save_node(node):
+	var path = Settings.saven_path.plus_file(node.name + ".ews")
+	Logger.info("Saving game to " + path)
+	var save_game = File.new()
+	save_game.open(path, File.WRITE)
+	# Check the node is an instanced scene so it can be instanced again during load.
+	if node.filename.empty():
+		Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
+
+	# Check the node has a save function.
+	if !node.has_method("save"):
+		Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
+	# Call the node's save function.
+	var node_data = node.call("save")
+
+	# Store the save dictionary as a new line in the save file.
+	save_game.store_line(to_json(node_data))
+	save_game.close()
+	Logger.info("Game was saved to " + path)
+	
 # Note: This can be called from anywhere inside the tree. This function is
 # path independent.
 # Go through everything in the persist category and ask them to return a
 # dict of relevant variables.
 func save_game():
-	Logger.info("Saving game to " + "user://savegame.save")
-	var save_game = File.new()
-	save_game.open("user://savegame.save", File.WRITE)
 	var save_nodes = get_tree().get_nodes_in_group("Persist")
 	for node in save_nodes:
-		# Check the node is an instanced scene so it can be instanced again during load.
-		if node.filename.empty():
-			Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
-			continue
+		save_node(node)
 
-		# Check the node has a save function.
-		if !node.has_method("save"):
-			Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
-			continue
-
-		# Call the node's save function.
-		var node_data = node.call("save")
-
-		# Store the save dictionary as a new line in the save file.
-		save_game.store_line(to_json(node_data))
-	save_game.close()
-	Logger.info("Game was saved to " + "user://savegame.save")
 
 func load_mods_cmd():
 	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
@@ -151,11 +186,31 @@ func list_mods_cmd():
 	Console.write_line($PacksManager.list_mods())
 
 func save_game_cmd():
-	Console.write_line("Saving game to " + "user://savegame.save")
+	Console.write_line("Starting saving game.")
 	save_game()
-	Console.write_line("Game was saved to " + "user://savegame.save")
+	Console.write_line("Finished saving game.")
 
 func load_game_cmd():
-	Console.write_line("Loading game from " + "user://savegame.save")
+	Console.write_line("Starting loading game.")
 	load_game()
-	Console.write_line("Game was loaded from " + "user://savegame.save")
+	Console.write_line("Finished loading game.")
+
+func _search_savens(path):
+	var paths = []
+	
+	var dir = Directory.new()
+	if dir.open(path) == OK:
+		dir.list_dir_begin(true, true)
+		var file_name = dir.get_next()
+		while file_name != "":
+			if dir.current_is_dir():
+				pass
+				paths.append_array(_search_savens(path.plus_file(file_name)))
+			else:
+				if file_name.match("*.ews"):
+					paths.append(dir.get_current_dir().plus_file(file_name))
+			file_name = dir.get_next()
+	else:
+		Logger.info(path + " is missing")
+	dir.list_dir_end()
+	return paths

@@ -7,8 +7,6 @@ var is_generated = false
 
 onready var map = $Map
 
-var subnode_data setget set_subnode_data
-
 func setup():
 	add_to_group("Persist")
 	player = get_node("Players/" + str(player_id))
@@ -20,27 +18,22 @@ func exit_loading():
 	$Map.exit_loading()
 	
 func save():
+	var persist_data = {}
+	
+	persist_data["ori"] = self.get_persist_data()
+	
+	for i in get_children():
+		if i.has_method("save"):
+			persist_data[i.get_path()] = i.save()
+	return persist_data
+	
+func get_persist_data():
 	var save_dict = {
 		"filename": get_filename(),
 		"is_generated": is_generated,
-		"parent" : get_parent().get_path(),
-		"subnode_data": {}
+		"parent" : get_parent().get_path()
 	}
-	for i in get_children():
-		if i.has_method("save"):
-			save_dict.subnode_data[i.get_path()] = i.save()
 	return save_dict
-
-func set_subnode_data(value: Dictionary):
-	for i in value.keys():
-		if value[i].has("pos_x") and value[i].has("pos_y"):
-			get_node(i).set("position", Vector2(value[i].pos_x, value[i].pos_y))
-		for j in value[i].keys():
-			get_node(i).set(j, value[i][j])
-			if j == "pos_x" or j == "pos_y":
-				continue
-		if get_node(i).has_method("setup"):
-			get_node(i).call("setup")
 
 func get_navigation():
 	return $Navigation

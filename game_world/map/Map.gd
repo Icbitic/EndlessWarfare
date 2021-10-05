@@ -198,15 +198,23 @@ func _draw_cell(x, y, z, update_bitmask = true):
 			return OK
 		PATH:
 			$Path.set_cell(x, y, get_cell(x, y, PATH))
+			if update_bitmask:
+				$Path.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
 			return OK
 		FLOOR:
 			$Floor.set_cell(x, y, get_cell(x, y, FLOOR))
+			if update_bitmask:
+				$Floor.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
 			return OK
 		FENCE:
 			$Fence.set_cell(x, y, get_cell(x, y, FENCE))
+			if update_bitmask:
+				$Fence.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
 			return OK
 		WALL:
 			$Wall.set_cell(x, y, get_cell(x, y, WALL))
+			if update_bitmask:
+				$Wall.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
 			return OK
 		_:
 			return ERR_DOES_NOT_EXIST
@@ -214,7 +222,12 @@ func _draw_cell(x, y, z, update_bitmask = true):
 
 func _draw_chunks(update_bitmask = false):
 	for position in chunks.get_all_cells().keys():
-		_draw_cell(position.x, position.y, position.z, update_bitmask)
+		match typeof(position):
+			TYPE_STRING:
+				var pos = position.substr(1, position.length()).split(",")
+				_draw_cell(pos[0], pos[1], pos[2], update_bitmask)
+			TYPE_VECTOR3:
+				_draw_cell(position.x, position.y, position.z, update_bitmask)
 	for i in range(chunks.map_size):
 		for j in range(chunks.map_size):
 			_draw_cell(i, j, TERRAIN, update_bitmask)

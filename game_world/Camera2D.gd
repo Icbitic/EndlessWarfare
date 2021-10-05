@@ -18,8 +18,6 @@ var input = {
 	"zoom_out": false
 }
 
-var subnode_data setget set_subnode_data
-
 func _ready():
 	pass
 
@@ -85,23 +83,11 @@ func _unhandled_input(event):
 		input.zoom_out = false
 	
 
-func save():
+func get_persist_data():
 	var save_dict = {
-		"subnode_data": {},
 		"pos_x": position.x,
 		"pos_y": position.y,
-		"zoom": zoom
+		"zoom_x": zoom.x,
+		"zoom_y":zoom.y
 	}
-	for i in get_children():
-		if i.has_method("save"):
-			save_dict.subnode_data[i.get_path()] = i.save()
 	return save_dict
-
-func set_subnode_data(value: Dictionary):
-	for i in value.keys():
-		for j in value[i].keys():
-			get_node(i).set(j, value[i][j])
-			if j == "pos_x" or j == "pos_y":
-				get_node(i).set("position", Vector2(value[i].pos_x, value[i].pos_y))
-		if get_node(i).has_method("setup"):
-			get_node(i).call("setup")
