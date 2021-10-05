@@ -52,6 +52,8 @@ _global_script_class_icons={
 
 config/name="Endless Warfare"
 run/main_scene="res://main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name=".endlesswarfare"
 config/icon="res://icon.png"
 
 [autoload]

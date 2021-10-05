@@ -24,7 +24,7 @@ func _ready():
 		# Todo: Find out a way to make mod able to add some settings here.
 		
 	else:
-		Logger.info("Unable to load res://info.json")
+		Logger.info("Unable to load res://settings.json")
 
 func check_compatibility(version_support):
 	match typeof(version_support):

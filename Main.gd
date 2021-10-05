@@ -35,15 +35,22 @@ func _ready():
 	.set_description("Load game data from disk.")\
 	.register()
 	
-	if load_game() == ERR_DOES_NOT_EXIST:
-		world = world.instance()
-		add_child(world)
-		world.setup()
+	var load_res = load_game()
+	
+	if typeof(load_res) != TYPE_ARRAY:
+		if load_res == ERR_DOES_NOT_EXIST:
+			world = world.instance()
+			add_child(world)
+			world.setup()
 	
 	# Test the game functions to check if they are OK. 
 	$Test.test()
 	
 func load_file(path):
+	# Path is ERR_*.
+	if typeof(path) == TYPE_INT:
+		return path
+		
 	Logger.info("Loading game data from " + path)
 	var save_game = File.new()
 	if not save_game.file_exists(path):
@@ -115,15 +122,23 @@ func load_game():
 			i.exit_loading()
 		i.queue_free()
 		yield(i, "tree_exited")
-		
-	for i in _search_savens("user://test_saven"):
+	
+	var res = _search_savens("user://test_saven")
+	
+	for i in res:
 		load_file(i)
 		
-		
+	return res
+	
 func save_node(node):
 	var path = Settings.saven_path.plus_file(node.name + ".ews")
 	Logger.info("Saving game to " + path)
 	var save_game = File.new()
+	if save_game.open(path, File.WRITE) == ERR_FILE_NOT_FOUND:
+		var dir = Directory.new()
+		dir.open("user://")
+		dir.make_dir(Settings.saven_path)
+		
 	save_game.open(path, File.WRITE)
 	# Check the node is an instanced scene so it can be instanced again during load.
 	if node.filename.empty():
@@ -211,6 +226,7 @@ func _search_savens(path):
 					paths.append(dir.get_current_dir().plus_file(file_name))
 			file_name = dir.get_next()
 	else:
+		return ERR_DOES_NOT_EXIST
 		Logger.info(path + " is missing")
 	dir.list_dir_end()
 	return paths
