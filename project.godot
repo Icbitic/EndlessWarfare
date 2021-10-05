@@ -54,6 +54,8 @@ config/name="Endless Warfare"
 run/main_scene="res://main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name=".endlesswarfare"
+boot_splash/image="res://bootsplash.png"
+boot_splash/use_filter=false
 config/icon="res://icon.png"
 
 [autoload]
