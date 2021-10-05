@@ -32,6 +32,7 @@ func _ready():
 	if load_game() == ERR_DOES_NOT_EXIST:
 		world = world.instance()
 		add_child(world)
+		world.setup()
 	
 	# Test the game functions to check if they are OK. 
 	$Test.test()
@@ -39,6 +40,7 @@ func _ready():
 # Note: This can be called from anywhere inside the tree. This function
 # is path independent.
 func load_game():
+	Logger.info("Loading game from " + "user://savegame.save")
 	var save_game = File.new()
 	if not save_game.file_exists("user://savegame.save"):
 		return ERR_DOES_NOT_EXIST# Error! We don't have a save to load.
@@ -52,7 +54,8 @@ func load_game():
 		if i.has_method("exit_loading"):
 			i.exit_loading()
 		i.queue_free()
-
+		yield(i, "tree_exited")
+	
 	# Load the file line by line and process that dictionary to restore
 	# the object it represents.
 	var res = save_game.open("user://savegame.save", File.READ)
@@ -61,26 +64,35 @@ func load_game():
 		var node_data: Dictionary = parse_json(save_game.get_line())
 
 		# Firstly, we need to create the object and add it to the tree and set its position.
-		var new_object = load(node_data["filename"]).instance()
+		var new_object: Node = load(node_data["filename"]).instance()
 		
 		if node_data.has("pos_x") and node_data.has("pos_y"):
 			new_object.position = Vector2(node_data["pos_x"], node_data["pos_y"])
-
+			
+		if node_data.has("is_generated"):
+			new_object.is_generated = node_data.is_generated
+			
+		get_node(node_data["parent"]).add_child(new_object)
+			
 		# Now we set the remaining variables.
 		for i in node_data.keys():
-			if i == "filename" or i == "parent" or i == "pos_x" or i == "pos_y":
+			if i == "filename" or i == "parent" or i == "pos_x" or i == "pos_y" or i == "is_generated":
 				continue
 			new_object.set(i, node_data[i])
 			
-		get_node(node_data["parent"]).add_child(new_object)
+		if new_object.has_method("setup"):
+			new_object.call("setup")
+		
 
 	save_game.close()
+	Logger.info("Game was loaded from " + "user://savegame.save")
 
 # Note: This can be called from anywhere inside the tree. This function is
 # path independent.
 # Go through everything in the persist category and ask them to return a
 # dict of relevant variables.
 func save_game():
+	Logger.info("Saving game to " + "user://savegame.save")
 	var save_game = File.new()
 	save_game.open("user://savegame.save", File.WRITE)
 	var save_nodes = get_tree().get_nodes_in_group("Persist")
@@ -101,6 +113,7 @@ func save_game():
 		# Store the save dictionary as a new line in the save file.
 		save_game.store_line(to_json(node_data))
 	save_game.close()
+	Logger.info("Game was saved to " + "user://savegame.save")
 
 func load_mods_cmd():
 	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
@@ -138,11 +151,11 @@ func list_mods_cmd():
 	Console.write_line($PacksManager.list_mods())
 
 func save_game_cmd():
+	Console.write_line("Saving game to " + "user://savegame.save")
 	save_game()
 	Console.write_line("Game was saved to " + "user://savegame.save")
-	Logger.info("Game was saved to " + "user://savegame.save")
 
 func load_game_cmd():
+	Console.write_line("Loading game from " + "user://savegame.save")
 	load_game()
 	Console.write_line("Game was loaded from " + "user://savegame.save")
-	Logger.info("Game was loaded from " + "user://savegame.save")

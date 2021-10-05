@@ -120,7 +120,6 @@ func set_chunks_data(value: Dictionary):
 		if i == "map_size":
 			continue
 		chunks.set(i, value[i])
-	chunks_data = value
 
 func update_tilemap():
 	Logger.info("Starting drawing the data from chunks to the Tilemaps.")

@@ -1,7 +1,5 @@
 extends Node2D
 
-var velocity = Vector2(0, 0)
-
 var subnode_data setget set_subnode_data
 
 func save():

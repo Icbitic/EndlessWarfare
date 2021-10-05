@@ -18,6 +18,8 @@ var input = {
 	"zoom_out": false
 }
 
+var subnode_data setget set_subnode_data
+
 func _ready():
 	pass
 
@@ -46,8 +48,8 @@ func _process(delta):
 		_target_zoom = _target_zoom * Vector2(1, 1)
 		
 	$Tween.interpolate_property(self, "zoom",
-	zoom, _target_zoom, 0.1,
-	Tween.TRANS_LINEAR, Tween.EASE_OUT_IN)
+			zoom, _target_zoom, 0.1,
+			Tween.TRANS_LINEAR, Tween.EASE_OUT_IN)
 	$Tween.start()
 
 # warning-ignore:unused_argument
@@ -82,3 +84,24 @@ func _unhandled_input(event):
 	if not Input.is_action_just_released("zoom_out"):
 		input.zoom_out = false
 	
+
+func save():
+	var save_dict = {
+		"subnode_data": {},
+		"pos_x": position.x,
+		"pos_y": position.y,
+		"zoom": zoom
+	}
+	for i in get_children():
+		if i.has_method("save"):
+			save_dict.subnode_data[i.get_path()] = i.save()
+	return save_dict
+
+func set_subnode_data(value: Dictionary):
+	for i in value.keys():
+		for j in value[i].keys():
+			get_node(i).set(j, value[i][j])
+			if j == "pos_x" or j == "pos_y":
+				get_node(i).set("position", Vector2(value[i].pos_x, value[i].pos_y))
+		if get_node(i).has_method("setup"):
+			get_node(i).call("setup")
