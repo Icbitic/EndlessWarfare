@@ -6,17 +6,9 @@ const CHUNK_SIZE = 16
 
 var map_size = Settings.map_size
 # Only store cells except TERRIAN.
-var data = {}
+var data = {} setget set_data
 # Seperate the terrian to use less memory.
 var terrian = []
-
-func save():
-	var save_dict = {
-		"data": data,
-		"terrian": terrian,
-		"map_size": map_size
-	}
-	return save_dict
 
 func setup(size):
 	Logger.info("Chunks of a " + str(size) + "x map was set up.")
@@ -29,7 +21,19 @@ func setup(size):
 		terrian_column.resize(map_size)
 		terrian[i] = terrian_column
 		
-	
+func get_persist_data():
+	var save_dict = {
+		"data": data,
+		"terrian": terrian,
+		"map_size": map_size
+	}
+	return save_dict
+
+func set_data(value):
+	for i in value.keys():
+		var pos = i.substr(1, i.length() - 2).split(",")
+		data[Vector3(pos[0].to_int(), pos[1].to_int(), pos[2].to_int())] = value[i]
+	print(data)
 # Only returns cells except TERRIAN.
 func get_all_cells():
 	return data

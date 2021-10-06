@@ -10,6 +10,11 @@ const ignore_data = [
 	]
 
 func _ready():
+	
+	#var file = File.new()
+	
+	#print(file.get_md5("res://"))
+	
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
@@ -46,68 +51,6 @@ func _ready():
 	# Test the game functions to check if they are OK. 
 	$Test.test()
 	
-func load_file(path):
-	# Path is ERR_*.
-	if typeof(path) == TYPE_INT:
-		return path
-		
-	Logger.info("Loading game data from " + path)
-	var save_game = File.new()
-	if not save_game.file_exists(path):
-		return ERR_DOES_NOT_EXIST# Error! We don't have a save to load.
-
-	
-	# Load the file line by line and process that dictionary to restore
-	# the object it represents.
-	var res = save_game.open(path, File.READ)
-	while save_game.get_position() < save_game.get_len():
-		# Get the saved dictionary from the next line in the save file
-		var node_data: Dictionary = parse_json(save_game.get_line())
-
-		# Firstly, we need to create the object and add it to the tree and set its position.
-		var new_object: Node = load(node_data.ori["filename"]).instance()
-		get_node(node_data.ori["parent"]).add_child(new_object)
-		
-		for i in node_data.keys():
-			if i == "ori":
-				if node_data[i].has("pos_x") and node_data[i].has("pos_y"):
-					new_object.position = Vector2(node_data[i]["pos_x"], node_data[i]["pos_y"])
-					
-				if node_data[i].has("is_generated"):
-					new_object.is_generated = node_data[i].is_generated
-					
-				# Now we set the remaining variables.
-				for j in node_data[i].keys():
-					if ignore_data.has(i):
-						continue
-					new_object.set(j, node_data[i][j])
-					
-				if new_object.has_method("setup"):
-					
-					new_object.call("setup")
-					
-				continue
-				
-			if node_data[i].has("pos_x") and node_data[i].has("pos_y"):
-				get_node(i).position = Vector2(node_data[i]["pos_x"], node_data[i]["pos_y"])
-				
-			if node_data[i].has("is_generated"):
-				get_node(i).is_generated = node_data[i].is_generated
-				
-			# Now we set the remaining variables.
-			for j in node_data[i].keys():
-				if ignore_data.has(i):
-					continue
-				get_node(i).set(j, node_data[i][j])
-			
-			if get_node(i).has_method("setup"):
-				get_node(i).call("setup")
-		
-
-	save_game.close()
-	Logger.info("Game data was loaded from " + path)
-
-	
 # Note: This can be called from anywhere inside the tree. This function
 # is path independent.
 func load_game():
@@ -126,7 +69,7 @@ func load_game():
 	var res = _search_savens("user://test_saven")
 	
 	for i in res:
-		load_file(i)
+		_load_file(i)
 		
 	return res
 	
@@ -226,7 +169,66 @@ func _search_savens(path):
 					paths.append(dir.get_current_dir().plus_file(file_name))
 			file_name = dir.get_next()
 	else:
-		return ERR_DOES_NOT_EXIST
 		Logger.info(path + " is missing")
+		return ERR_DOES_NOT_EXIST
 	dir.list_dir_end()
 	return paths
+
+
+func _load_node(node, node_data):
+	if node_data.has("pos_x") and node_data.has("pos_y"):
+		node.position = Vector2(node_data["pos_x"], node_data["pos_y"])
+		
+	if node_data.has("is_generated"):
+		node.is_generated = node_data.is_generated
+	
+	# Now we set the r.keys():
+	for i in node_data.keys():
+		if ignore_data.has(i):
+			continue
+			
+		if typeof(node_data[i]) == TYPE_STRING:
+			if node_data[i].match("(*,*,*)"):
+				var pos = node_data[i].substr(1, node_data[i].length() - 2).split(",")
+				node.set(i, Vector3(pos[0].to_float(), pos[1].to_float(), pos[2].to_float()))
+				continue
+			if node_data[i].match("(*,*)"):
+				var pos = node_data[i].substr(1, node_data[i].length() - 2).split(",")
+				node.set(i, Vector2(pos[0].to_float(), pos[1].to_float()))
+				continue
+		node.set(i, node_data[i])
+		
+	if node.has_method("setup"):
+		node.call("setup")
+
+func _load_file(path):
+	# Path is ERR_*.
+	if typeof(path) == TYPE_INT:
+		return path
+		
+	Logger.info("Loading game data from " + path)
+	var save_game = File.new()
+	if not save_game.file_exists(path):
+		return ERR_DOES_NOT_EXIST# Error! We don't have a save to load.
+
+	
+	# Load the file line by line and process that dictionary to restore
+	# the object it represents.
+	var res = save_game.open(path, File.READ)
+	while save_game.get_position() < save_game.get_len():
+		# Get the saved dictionary from the next line in the save file
+		var node_data: Dictionary = parse_json(save_game.get_line())
+
+		# Firstly, we need to create the object and add it to the tree and set its position.
+		var new_object: Node = load(node_data.ori["filename"]).instance()
+		get_node(node_data.ori["parent"]).add_child(new_object)
+		
+		for i in node_data.keys():
+			if i == "ori":
+				_load_node(new_object, node_data[i])
+				continue
+			_load_node(get_node(i), node_data[i])
+			
+	save_game.close()
+	Logger.info("Game data was loaded from " + path)
+	return res

@@ -19,8 +19,14 @@ var input = {
 }
 
 func _ready():
-	pass
-
+	# The limit is in pixels and positive.
+	var limit = 0.5 * Settings.map_size * TEXTURE_SHEET_WIDTH
+	limit_left = -limit
+	limit_top = -limit
+	limit_right = limit
+	limit_bottom = limit
+	
+	
 func _process(delta):
 	var velocity = Vector2()  # The player's movement vector.
 	
@@ -35,7 +41,10 @@ func _process(delta):
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * MOVE_SPEED * TEXTURE_SHEET_WIDTH * delta
 	
-	position += velocity
+	var block_length = 0.5 * OS.get_real_window_size() * zoom.x
+	#print(block_length)
+	position.x = clamp(position.x + velocity.x, limit_left + block_length.x, limit_right - block_length.x)
+	position.y = clamp(position.y + velocity.y, limit_top + block_length.y, limit_bottom - block_length.y)
 	
 	
 	if input.zoom_in:
@@ -85,9 +94,8 @@ func _unhandled_input(event):
 
 func get_persist_data():
 	var save_dict = {
-		"pos_x": position.x,
-		"pos_y": position.y,
-		"zoom_x": zoom.x,
-		"zoom_y":zoom.y
+		"position": position,
+		"zoom": zoom,
+		"_target_zoom": _target_zoom
 	}
 	return save_dict

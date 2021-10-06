@@ -29,6 +29,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://packs_manager/pck.gd"
 }, {
+"base": "Node",
+"class": "PersistObject",
+"language": "GDScript",
+"path": "res://classes/persist_object.gd"
+}, {
 "base": "TileMap",
 "class": "PlaneMap",
 "language": "GDScript",
@@ -44,6 +49,7 @@ _global_script_class_icons={
 "Chunks": "",
 "Database": "",
 "Pack": "",
+"PersistObject": "",
 "PlaneMap": "",
 "TerrainGenerator": ""
 }

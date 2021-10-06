@@ -1,4 +1,4 @@
-extends Node2D
+extends PersistObject
 
 var player_id = 0
 var player
@@ -15,18 +15,10 @@ func setup():
 		is_generated = true
 		
 func exit_loading():
-	$Map.exit_loading()
-	
-func save():
-	var persist_data = {}
-	
-	persist_data["ori"] = self.get_persist_data()
-	
-	for i in get_children():
-		if i.has_method("save"):
-			persist_data[i.get_path()] = i.save()
-	return persist_data
-	
+	for i in _get_all_children():
+		if i.has_method("exit_loading"):
+			i.exit_loading()
+
 func get_persist_data():
 	var save_dict = {
 		"filename": get_filename(),

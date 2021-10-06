@@ -102,11 +102,11 @@ func remove_commands():
 	Console.remove_command("setwall")
 	Console.remove_command("setcell")
 	
-func save():
+func get_persist_data():
 	var save_dict = {
 		"filename": get_filename(),
 		"parent" : get_parent().get_path(),
-		"chunks_data": chunks.save(),
+		"chunks_data": chunks.get_persist_data(),
 		"map_size": map_size,
 		"is_generated": is_generated
 	}
@@ -130,6 +130,11 @@ func update_tilemap():
 	Logger.info("The data from Chunks were drawn into Tilemaps.")
 	
 	$Terrain.update_bitmask_region()
+	$Fence.update_bitmask_region()
+	$Path.update_bitmask_region()
+	$Wall.update_bitmask_region()
+	$Floor.update_bitmask_region()
+	
 	Logger.info("Terrain's bitmask is updated.")
 	
 	var final_time = OS.get_ticks_msec()
@@ -165,6 +170,52 @@ func setcell_cmd(x, y, z, tile):
 
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var result = chunks.set_cell(x, y, z, tile)
+	
+	chunks.set_cell(x, y, z, tile)
+	
+	# BIG BIG BIG Todo: Detect if it is available to set the cell.
+	
+#	# Post process the map
+#	# First to remove the cells of wrong bitmasks
+#	var template1 = [
+#		LAND, LAND, WATER,
+#		LAND, LAND, LAND,
+#		WATER, LAND, LAND
+#	]
+#	var template2 = [
+#		WATER, LAND, LAND,
+#		LAND, LAND, LAND,
+#		LAND, LAND, WATER
+#	]
+#
+#	var _map_cache = []
+#	_map_cache.resize(5)
+#	for i in range(5):
+#		var _column_cache = []
+#		_column_cache.resize(5)
+#		_map_cache[i] = _column_cache
+#
+#	for i in range(5):
+#		for j in range(5):
+#			_map_cache[i][j] = chunks.get_cell(x - 2 + i, y - 2 + j, TERRAIN)
+#
+#	for i in range(x - 1, x + 2):
+#		for j in range(y - 1, y + 2):
+#			var nearby = [
+#				_map_cache[i - x][j - y], _map_cache[i - x + 1][j - y], _map_cache[i + 2 - x][j - y],
+#				_map_cache[i - x][j - y + 1], _map_cache[i - x + 1][j - y + 1], _map_cache[i + 2 - x][j - y + 1],
+#				_map_cache[i - x][j + 2 - y], _map_cache[i - x + 1][j + 2 - y], _map_cache[i + 2 - x][j + 2 - y]
+#			]
+#			print(Vector2(i, j), nearby)
+#			print(template2)
+#			print(nearby.hash() == template2.hash())
+#			if nearby.hash() == template1.hash() or nearby.hash() == template2.hash():
+#				for m in range(i - 1, i + 2):
+#					for n in range(j - 1, j + 2):
+#						chunks.set_cell(m, n, TERRAIN, tile)
+#						_draw_cell(m, n, TERRAIN, update_bitmask)
+#	print("===============")
+
 	_draw_cell(x, y, z, update_bitmask)
 	return result
 
@@ -219,15 +270,18 @@ func _draw_cell(x, y, z, update_bitmask = true):
 		_:
 			return ERR_DOES_NOT_EXIST
 			
-
 func _draw_chunks(update_bitmask = false):
 	for position in chunks.get_all_cells().keys():
-		match typeof(position):
-			TYPE_STRING:
-				var pos = position.substr(1, position.length()).split(",")
-				_draw_cell(pos[0], pos[1], pos[2], update_bitmask)
-			TYPE_VECTOR3:
-				_draw_cell(position.x, position.y, position.z, update_bitmask)
+		# This is for an unknow bug.
+		if position.z == PATH:
+			_draw_cell(position.x, position.y, PATH, update_bitmask)
+		if position.z == FLOOR:
+			_draw_cell(position.x, position.y, FLOOR, update_bitmask)
+		if position.z == FENCE:
+			_draw_cell(position.x, position.y, FENCE, update_bitmask)
+		if position.z == WALL:
+			_draw_cell(position.x, position.y, WALL, update_bitmask)
+			
 	for i in range(chunks.map_size):
 		for j in range(chunks.map_size):
 			_draw_cell(i, j, TERRAIN, update_bitmask)
