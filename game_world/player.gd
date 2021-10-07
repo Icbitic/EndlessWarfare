@@ -15,4 +15,4 @@ func exit_loading():
 	Console.remove_command("tp")
 	
 func tp_cmd(pos_x, pos_y):
-	$"0/Camera2D".position = Vector2(pos_x * TEXTURE_SHEET_WIDTH, pos_y * TEXTURE_SHEET_WIDTH)
+	$Camera2D.position = Vector2(pos_x * TEXTURE_SHEET_WIDTH, pos_y * TEXTURE_SHEET_WIDTH)

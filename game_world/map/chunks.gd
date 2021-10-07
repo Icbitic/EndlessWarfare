@@ -33,7 +33,6 @@ func set_data(value):
 	for i in value.keys():
 		var pos = i.substr(1, i.length() - 2).split(",")
 		data[Vector3(pos[0].to_int(), pos[1].to_int(), pos[2].to_int())] = value[i]
-	print(data)
 # Only returns cells except TERRIAN.
 func get_all_cells():
 	return data
