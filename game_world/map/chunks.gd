@@ -65,14 +65,7 @@ func get_cell(x, y, z):
 		return terrian[x][y]
 	else:
 		var res = data[Vector3(x, y, z)]
-		# I don't know the bug...
-		if res == TREE:
-			return TREE
-		if res == DEAD_TREE:
-			return DEAD_TREE
-		if res == BUSH:
-			return BUSH
-		return res
+		return int(res)
 
 func has_cell(x, y, z):
 	if z == TERRAIN:
@@ -101,6 +94,23 @@ func is_cell_empty(x, y):
 		if not data[Vector3(x, y, PLANT)] == -1:
 			return false
 	return true
+	
+func clear_fixed_object(pos: Vector2):
+	if data.has(Vector3(pos.x, pos.y, PATH)):
+		data[Vector3(pos.x, pos.y, PATH)] = -1
+		
+	if data.has(Vector3(pos.x, pos.y, FLOOR)):
+		data[Vector3(pos.x, pos.y, FLOOR)] = -1
+		
+	if data.has(Vector3(pos.x, pos.y, FENCE)):
+		data[Vector3(pos.x, pos.y, FENCE)] = -1
+		
+	if data.has(Vector3(pos.x, pos.y, WALL)):
+		data[Vector3(pos.x, pos.y, WALL)] = -1
+		
+	if data.has(Vector3(pos.x, pos.y, PLANT)):
+		data[Vector3(pos.x, pos.y, PLANT)] = -1
+	return OK
 	
 func generate():
 	var terrain_generator = TerrainGenerator.new()

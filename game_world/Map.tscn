@@ -42,14 +42,12 @@ format = 1
 script = ExtResource( 3 )
 
 [node name="Wall" type="TileMap" parent="."]
-z_index = 1
 tile_set = ExtResource( 5 )
 cell_size = Vector2( 8, 8 )
 format = 1
 script = ExtResource( 6 )
 
-[node name="Shadow" type="TileMap" parent="Wall"]
-z_index = -1
+[node name="Shadow" type="TileMap" parent="."]
 tile_set = ExtResource( 8 )
 cell_size = Vector2( 8, 8 )
 format = 1

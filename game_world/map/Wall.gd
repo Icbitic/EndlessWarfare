@@ -4,6 +4,8 @@ var GlobalNavigation
 
 enum {LEFT, LEFTTOP, TOP}
 
+onready var Shadow = get_parent().get_node("Shadow")
+
 var map_size = Settings.map_size
 var shadow = []
 
@@ -51,24 +53,24 @@ func update_shadow(x, y):
 		return
 	match shadow[x][y]:
 		[false, false, false]:
-			$Shadow.set_cell(x, y, -1)
+			Shadow.set_cell(x, y, -1)
 		[false, false, true]:
-			$Shadow.set_cell(x, y, 0)
+			Shadow.set_cell(x, y, 0)
 		[false, true, false]:
-			$Shadow.set_cell(x, y, 2)
+			Shadow.set_cell(x, y, 2)
 		[false, true, true]:
-			$Shadow.set_cell(x, y, 7)
+			Shadow.set_cell(x, y, 7)
 		[true, false, false]:
-			$Shadow.set_cell(x, y, 1)
+			Shadow.set_cell(x, y, 1)
 		[true, false, true]:
 			if randi() % 2 == 1:
-				$Shadow.set_cell(x, y, 5)
+				Shadow.set_cell(x, y, 5)
 			else:
-				$Shadow.set_cell(x, y, 6)
+				Shadow.set_cell(x, y, 6)
 		[true, true, false]:
 			if randi() % 2 == 1:
-				$Shadow.set_cell(x, y, 3)
+				Shadow.set_cell(x, y, 3)
 			else:
-				$Shadow.set_cell(x, y, 4)
+				Shadow.set_cell(x, y, 4)
 		[true, true, true]:
-			$Shadow.set_cell(x, y, 7)
+			Shadow.set_cell(x, y, 7)

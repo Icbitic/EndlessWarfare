@@ -24,6 +24,18 @@ func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
+	var load_res = load_game()
+
+	if typeof(load_res) == TYPE_INT:
+		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
+			var map_node = map.instance()
+			map_node.map_id = map_amount
+			map_amount += 1
+			$World.add_child(map_node)
+			add_child(test.instance())
+			$Test.add_child(test2.instance())
+			add_child(camera.instance())
+			
 	load_mods()
 	
 	Console.add_command("loadmods", self, "_loadmods_cmd")\
@@ -58,18 +70,6 @@ func _ready():
 	.set_description("List orphan nodes.")\
 	.register()
 	
-	var load_res = load_game()
-
-	if typeof(load_res) == TYPE_INT:
-		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
-			var map_node = map.instance()
-			map_node.map_id = map_amount
-			map_amount += 1
-			$World.add_child(map_node)
-			add_child(test.instance())
-			$Test.add_child(test2.instance())
-			add_child(camera.instance())
-			
 
 func _notification(what):
 	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
