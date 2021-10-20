@@ -1,5 +1,9 @@
 extends Node
 
+signal packs_loaded
+signal packs_loaded_off
+
+
 const pack_data_template = [
 	"name",
 	"version",
@@ -15,12 +19,14 @@ var packs = {}
 
 func load_packs(path):
 	# Don't send res:// here
-	return _search_packs(path)
+	emit_signal("packs_loaded")
+	return _import_packs(path)
 
 func load_off():
 	Logger.info("All packs are loaded off.")
 	var amount = packs.size()
 	packs = {}
+	emit_signal("packs_loaded_off")
 	return amount
 
 func get_packs():
@@ -37,7 +43,7 @@ func list_mods():
 		return "No mods were loaded."
 
 # Privare Methods
-func _search_packs(path, intended = false):
+func _import_packs(path, intended = false):
 	var dir = Directory.new()
 	if dir.open(path) == OK:
 		dir.list_dir_begin(true, true)
@@ -45,7 +51,7 @@ func _search_packs(path, intended = false):
 		while file_name != "":
 			if dir.current_is_dir() and !intended:
 				pass
-				_search_packs(path.plus_file(file_name), true)
+				_import_packs(path.plus_file(file_name), true)
 			else:
 				if file_name.match("*.pck"):
 					if dir.get_current_dir() != path:

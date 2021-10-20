@@ -126,12 +126,14 @@ func find_commands(name):
 # @returns  Command/CommandBuilder
 func add_command(name, target, target_name = null):
 	emit_signal("command_added", name, target, target_name)
+	Logger.debug("Command added: " + name)
 	return self._command_service.create(name, target, target_name)
 
 # @param    String  name
 # @returns  int
 func remove_command(name):
 	emit_signal("command_removed", name)
+	Logger.debug("Command removed: " + name)
 	return self._command_service.remove(name)
 
 

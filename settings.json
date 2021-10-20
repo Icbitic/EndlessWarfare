@@ -6,5 +6,6 @@
     "record_navigation_details": false,
     "enable_test_set": true,
     "draw_chunk_outline": false,
-    "draw_cell_outline": false
+    "draw_cell_outline": false,
+    "save_before_quit": true
 }

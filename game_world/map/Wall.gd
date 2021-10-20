@@ -8,6 +8,7 @@ var map_size = Settings.map_size
 var shadow = []
 
 func _ready():
+	pass
 	shadow.resize(map_size)
 	for i in range(map_size):
 		var shadow_column = []
@@ -19,7 +20,8 @@ func _ready():
 			shadow[i][j].resize(3)
 			for k in range(3):
 				shadow[i][j][k] = false
-
+	
+	
 func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, autotile_coord = Vector2()):
 	if tile == -1:
 		# Delete the cell.

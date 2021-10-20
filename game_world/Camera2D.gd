@@ -1,9 +1,15 @@
 extends Camera2D
 
+signal transported(pos)
+
 # This MOVE_SPEED is in cells
 const MOVE_SPEED = 150
 const ZOOM_SPEED = 2
 const TEXTURE_SHEET_WIDTH = 8
+
+var TPDestinations = {
+	"mid": Vector2(0, 0)
+}
 
 var _target_zoom = zoom
 
@@ -19,6 +25,7 @@ var input = {
 }
 
 func _ready():
+	add_to_group("Persist")
 	# The limit is in pixels and positive.
 	var limit = 0.5 * Settings.map_size * TEXTURE_SHEET_WIDTH
 	limit_left = -limit
@@ -26,7 +33,21 @@ func _ready():
 	limit_right = limit
 	limit_bottom = limit
 	
+	Console.add_command("tp", self, "_tp_cmd")\
+	.set_description("Go to the given position.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.register()
 	
+	Console.add_command("tpd", self, "_tpd_cmd")\
+	.set_description("Go to the given position by keywords below:\n1. mid: the center of the map")\
+	.add_argument("des", TYPE_STRING)\
+	.register()
+	
+func _exit_tree():
+	Console.remove_command("tp")
+	Console.remove_command("tpd")
+
 func _process(delta):
 	var velocity = Vector2()  # The player's movement vector.
 	
@@ -92,10 +113,31 @@ func _unhandled_input(event):
 		input.zoom_out = false
 	
 
-func get_persist_data():
+func save():
 	var save_dict = {
+		"filename": get_filename(),
+		"parent" : get_parent().get_path(),
 		"position": position,
 		"zoom": zoom,
 		"_target_zoom": _target_zoom
 	}
 	return save_dict
+
+func _tp_cmd(pos_x, pos_y):
+	position = Vector2((pos_x - 0.5 * Settings.map_size) * TEXTURE_SHEET_WIDTH,
+			(pos_y - 0.5 * Settings.map_size) * TEXTURE_SHEET_WIDTH)
+	
+	emit_signal("transported", position)
+	
+	Console.write_line("Camera moved to " + str(position))
+	Logger.info("Camera moved to " + str(position))
+
+func _tpd_cmd(des):
+	if TPDestinations.has(des):
+		position = TPDestinations[des]
+		Console.write_line("Camera moved to " + str(position))
+		Logger.info("Camera moved to " + str(position))
+		emit_signal("transported", position)
+	else:
+		Console.write_line("ERROR: Can't find keyword " + des)
+		Logger.error("Can't find keyword " + des)

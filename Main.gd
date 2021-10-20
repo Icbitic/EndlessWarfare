@@ -1,56 +1,83 @@
-extends Node2D
+extends Node
+
+signal game_saved
+signal game_loaded
 
 var packs
-var world = preload("res://game_world/world.tscn")
+
+onready var test = preload("res://test/test.tscn")
+onready var test2 = preload("res://test/test2.tscn")
+onready var map = preload("res://game_world/Map.tscn")
+onready var camera = preload("res://game_world/camera.tscn")
+
+var map_amount = 0
 
 const ignore_data = [
-	"filename", "parent",
-	"pos_x", "pos_y",
-	"is_generated"
+	"filename", "parent"
 	]
 
 func _ready():
-	
 	#var file = File.new()
 	
 	#print(file.get_md5("res://"))
-	
+	Logger.get_module("main").set_output_level(Logger.DEBUG)
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
 	load_mods()
 	
-	Console.add_command("loadmods", self, "load_mods_cmd")\
+	Console.add_command("loadmods", self, "_loadmods_cmd")\
 	.set_description("Load .pck files in mods folder.")\
 	.register()
 	
-	Console.add_command("loadoff", self, "load_off_cmd")\
+	Console.add_command("loadoff", self, "_loadoff_cmd")\
 	.set_description("Load off all .pck files.")\
 	.register()
 	
-	Console.add_command("listmods", self, "list_mods_cmd")\
+	Console.add_command("listmods", self, "_listmods_cmd")\
 	.set_description("Load off all .pck files.")\
 	.register()
 	
-	Console.add_command("savegame", self, "save_game_cmd")\
+	Console.add_command("savegame", self, "_savegame_cmd")\
 	.set_description("Save game data to disk.")\
 	.register()
 	
-	Console.add_command("loadgame", self, "load_game_cmd")\
+	Console.add_command("loadgame", self, "_loadgame_cmd")\
 	.set_description("Load game data from disk.")\
 	.register()
 	
+	Console.add_command("listpersist", self, "_listpersist_cmd")\
+	.set_description("List all persist mods.")\
+	.register()
+	
+	Console.add_command("osinfo", self, "_osinfo_cmd")\
+	.set_description("List OS info.")\
+	.register()
+	
+	Console.add_command("orphan", self, "_orphan_cmd")\
+	.set_description("List orphan nodes.")\
+	.register()
+	
 	var load_res = load_game()
-	
-	if typeof(load_res) != TYPE_ARRAY:
-		if load_res == ERR_DOES_NOT_EXIST:
-			world = world.instance()
-			add_child(world)
-			world.setup()
-	
-	# Test the game functions to check if they are OK. 
-	$Test.test()
-	
+
+	if typeof(load_res) == TYPE_INT:
+		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
+			var map_node = map.instance()
+			map_node.map_id = map_amount
+			map_amount += 1
+			$World.add_child(map_node)
+			add_child(test.instance())
+			$Test.add_child(test2.instance())
+			add_child(camera.instance())
+			
+
+func _notification(what):
+	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+		Logger.info("Received quit request.")
+		if Settings.save_before_quit:
+			save_game()
+		get_tree().quit()
+
 # Note: This can be called from anywhere inside the tree. This function
 # is path independent.
 func load_game():
@@ -60,21 +87,30 @@ func load_game():
 	# For our example, we will accomplish this by deleting saveable objects.
 	var save_nodes = get_tree().get_nodes_in_group("Persist")
 		
-	for i in save_nodes:
-		if i.has_method("exit_loading"):
-			i.exit_loading()
-		i.queue_free()
-		yield(i, "tree_exited")
+	for i in range(save_nodes.size() - 1, -1, -1):
+		#print(save_nodes[i].get_path())
+		save_nodes[i].queue_free()
+		yield(save_nodes[i], "tree_exited")
 	
 	var res = _search_savens("user://test_saven")
+	_load_file(res)
 	
-	for i in res:
-		_load_file(i)
-		
+	if OS.is_debug_build() and typeof(res) == TYPE_STRING:
+		# Test the game functions to check if they are OK. 
+		$Test.test()
+	
+	emit_signal("game_loaded")
+	
 	return res
+
+# Note: This can be called from anywhere inside the tree. This function is
+# path independent.
+# Go through everything in the persist category and ask them to return a
+# dict of relevant variables.
+func save_game():
+	var save_nodes = get_tree().get_nodes_in_group("Persist")
 	
-func save_node(node):
-	var path = Settings.saven_path.plus_file(node.name + ".ews")
+	var path = Settings.saven_path.plus_file("saven.ews")
 	Logger.info("Saving game to " + path)
 	var save_game = File.new()
 	if save_game.open(path, File.WRITE) == ERR_FILE_NOT_FOUND:
@@ -83,34 +119,30 @@ func save_node(node):
 		dir.make_dir(Settings.saven_path)
 		
 	save_game.open(path, File.WRITE)
-	# Check the node is an instanced scene so it can be instanced again during load.
-	if node.filename.empty():
-		Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
-
-	# Check the node has a save function.
-	if !node.has_method("save"):
-		Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
-	# Call the node's save function.
-	var node_data = node.call("save")
-
-	# Store the save dictionary as a new line in the save file.
-	save_game.store_line(to_json(node_data))
-	save_game.close()
-	Logger.info("Game was saved to " + path)
 	
-# Note: This can be called from anywhere inside the tree. This function is
-# path independent.
-# Go through everything in the persist category and ask them to return a
-# dict of relevant variables.
-func save_game():
-	var save_nodes = get_tree().get_nodes_in_group("Persist")
+	var save_dict = {}
+	
 	for node in save_nodes:
-		save_node(node)
+		# Store the save dictionary as a new line in the save file.
+		# Check the node is an instanced scene so it can be instanced again during load.
+		if node.filename.empty():
+			Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
 
+		# Check the node has a save function.
+		if !node.has_method("save"):
+			Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
+		# Call the node's save function.
+		var saven_id = node.get("saven_id")
+		if saven_id == null:
+			save_dict[node.name] = node.call("save")
+		else:
+			save_dict[saven_id] = node.call("save")
+		
+	save_game.store_line(to_json(save_dict))
+	save_game.close()
+	emit_signal("game_saved")
+	Logger.info("Game was saved to " + path)
 
-func load_mods_cmd():
-	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
-	
 func load_mods():
 	Logger.info("Starting loading mods.")
 	if $PacksManager.load_packs("mods") == OK:
@@ -134,28 +166,10 @@ func load_mods():
 	# Return the amount of mods.
 	return $PacksManager.get_packs().size()
 
-func load_off_cmd():
-	Console.write_line(str(load_off()) + " mod(s) are loaded off.")
-
 func load_off():
 	return $PacksManager.load_off()
 	
-func list_mods_cmd():
-	Console.write_line($PacksManager.list_mods())
-
-func save_game_cmd():
-	Console.write_line("Starting saving game.")
-	save_game()
-	Console.write_line("Finished saving game.")
-
-func load_game_cmd():
-	Console.write_line("Starting loading game.")
-	load_game()
-	Console.write_line("Finished loading game.")
-
 func _search_savens(path):
-	var paths = []
-	
 	var dir = Directory.new()
 	if dir.open(path) == OK:
 		dir.list_dir_begin(true, true)
@@ -163,25 +177,17 @@ func _search_savens(path):
 		while file_name != "":
 			if dir.current_is_dir():
 				pass
-				paths.append_array(_search_savens(path.plus_file(file_name)))
 			else:
-				if file_name.match("*.ews"):
-					paths.append(dir.get_current_dir().plus_file(file_name))
+				if file_name.match("saven.ews"):
+					return dir.get_current_dir().plus_file(file_name)
 			file_name = dir.get_next()
 	else:
 		Logger.info(path + " is missing")
 		return ERR_DOES_NOT_EXIST
 	dir.list_dir_end()
-	return paths
-
+	return ERR_FILE_NOT_FOUND
 
 func _load_node(node, node_data):
-	if node_data.has("pos_x") and node_data.has("pos_y"):
-		node.position = Vector2(node_data["pos_x"], node_data["pos_y"])
-		
-	if node_data.has("is_generated"):
-		node.is_generated = node_data.is_generated
-	
 	# Now we set the r.keys():
 	for i in node_data.keys():
 		if ignore_data.has(i):
@@ -212,23 +218,85 @@ func _load_file(path):
 		return ERR_DOES_NOT_EXIST# Error! We don't have a save to load.
 
 	
-	# Load the file line by line and process that dictionary to restore
-	# the object it represents.
 	var res = save_game.open(path, File.READ)
-	while save_game.get_position() < save_game.get_len():
-		# Get the saved dictionary from the next line in the save file
-		var node_data: Dictionary = parse_json(save_game.get_line())
+	
+	var node_data: Dictionary = parse_json(save_game.get_line())
 
-		# Firstly, we need to create the object and add it to the tree and set its position.
-		var new_object: Node = load(node_data.ori["filename"]).instance()
-		get_node(node_data.ori["parent"]).add_child(new_object)
+	for node in node_data.keys():
 		
-		for i in node_data.keys():
-			if i == "ori":
-				_load_node(new_object, node_data[i])
-				continue
-			_load_node(get_node(i), node_data[i])
+		var new_object: Node = load(node_data[node]["filename"]).instance()
+		_load_node(new_object, node_data[node])
+		get_node(node_data[node]["parent"]).add_child(new_object)
+	
 			
 	save_game.close()
 	Logger.info("Game data was loaded from " + path)
 	return res
+
+func _get_all_children(node = self, children: Array = []):
+	for i in node.get_children():
+		_get_all_children(i, children)
+	if not node == self:
+		children.append(node)
+	return children
+
+func _loadmods_cmd():
+	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
+
+func _loadoff_cmd():
+	Console.write_line(str(load_off()) + " mod(s) are loaded off.")
+
+func _listmods_cmd():
+	Console.write_line($PacksManager.list_mods())
+
+func _listpersist_cmd():
+	var nodes = get_tree().get_nodes_in_group("Persist")
+	for i in nodes:
+		Console.write_line(i.get_path())
+		
+func _savegame_cmd():
+	Console.write_line("Starting saving game.")
+	save_game()
+	Console.write_line("Finished saving game.")
+
+func _loadgame_cmd():
+	Console.write_line("Starting loading game.")
+	load_game()
+	Console.write_line("Finished loading game.")
+
+func _osinfo_cmd():
+	Console.write_line("Vertical synchronization (Vsync): " + str(OS.vsync_enabled))
+	
+	Console.write_line("Audio drivers:")
+	for i in range(OS.get_audio_driver_count()):
+		Console.write_line(str(i) + ": " + OS.get_audio_driver_name(i))
+	
+	Console.write_line("Current executable engine path: " + OS.get_executable_path())
+	
+	Console.write_line("Model name: " + OS.get_model_name())
+	
+	Console.write_line("OS name: " + OS.get_name())
+	
+	Console.write_line("Power percent left: " + str(OS.get_power_percent_left()))
+	Console.write_line("Power seconds left: " + str(OS.get_power_seconds_left()))
+	
+	Console.write_line("Process id: " + str(OS.get_process_id()))
+	
+	Console.write_line("Process count: " + str(OS.get_processor_count()))
+	
+	Console.write_line("Window size: " + str(OS.get_real_window_size()))
+	
+	Console.write_line("Screen dpi: " + str(OS.get_screen_dpi()))
+	
+	Console.write_line("Static memory peak usage: " + String.humanize_size(OS.get_static_memory_peak_usage()))
+	Console.write_line("Static memory usage: " + String.humanize_size(OS.get_static_memory_usage()))
+	Console.write_line("Thread id: " + str(OS.get_thread_caller_id()))
+	
+	if OS.is_debug_build() == true:
+		Console.write_line("Debug build: true")
+	else:
+		Console.write_line("Debug build: false")
+		
+func _orphan_cmd():
+	print_stray_nodes()
+	Console.write_line("Orphan nodes are printed in logger.")

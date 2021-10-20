@@ -1,7 +1,13 @@
 class_name Chunks
 extends Resource
 
-enum {TERRAIN, PATH, FLOOR, FENCE, WALL}
+enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
+enum {LAND, WATER}
+enum {DIRT_ROAD, STONE_ROAD}
+enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
+enum {BLACK_WALL}
+enum {TREE, DEAD_TREE, BUSH}
+
 const CHUNK_SIZE = 16
 
 var map_size = Settings.map_size
@@ -58,14 +64,44 @@ func get_cell(x, y, z):
 	if z == TERRAIN:
 		return terrian[x][y]
 	else:
-		return data[Vector3(x, y, z)]
+		var res = data[Vector3(x, y, z)]
+		# I don't know the bug...
+		if res == TREE:
+			return TREE
+		if res == DEAD_TREE:
+			return DEAD_TREE
+		if res == BUSH:
+			return BUSH
+		return res
 
 func has_cell(x, y, z):
 	if z == TERRAIN:
 		return true
 	else:
 		return data.has(Vector3(x, y, z))
-
+		
+func is_cell_empty(x, y):
+	if data.has(Vector3(x, y, PATH)):
+		if not data[Vector3(x, y, PATH)] == -1:
+			return false
+			
+	if data.has(Vector3(x, y, FLOOR)):
+		if not data[Vector3(x, y, FLOOR)] == -1:
+			return false
+			
+	if data.has(Vector3(x, y, FENCE)):
+		if not data[Vector3(x, y, FENCE)] == -1:
+			return false
+			
+	if data.has(Vector3(x, y, WALL)):
+		if not data[Vector3(x, y, WALL)] == -1:
+			return false
+			
+	if data.has(Vector3(x, y, PLANT)):
+		if not data[Vector3(x, y, PLANT)] == -1:
+			return false
+	return true
+	
 func generate():
 	var terrain_generator = TerrainGenerator.new()
 	

@@ -13,6 +13,7 @@ var record_navigation_details = false
 var enable_test_set = false
 var draw_chunk_outline = false
 var draw_cell_outline = false
+var save_before_quit = true
 
 func _ready():
 	var file = File.new()
@@ -24,7 +25,7 @@ func _ready():
 		# Todo: Find out a way to make mod able to add some settings here.
 		
 	else:
-		Logger.info("Unable to load res://settings.json")
+		Logger.info("Unable to load settings.json")
 
 func check_compatibility(version_support):
 	match typeof(version_support):

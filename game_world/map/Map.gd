@@ -1,15 +1,24 @@
 extends Node
 
-enum {TERRAIN, PATH, FLOOR, FENCE, WALL}
+signal cell_set(pos, tile)
+signal tilemap_updated
+signal map_generated
+
+enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
 enum {LAND, WATER}
 enum {DIRT_ROAD, STONE_ROAD}
 enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
 enum {BLACK_WALL}
+enum {TREE, DEAD_TREE, BUSH}
 
 const CHUNK_SIZE = 16
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 const CHUNK_END_SIZE = CHUNK_SIZE - 1
 const WORLD_HEIGHT = 5
+const TEXTURE_SHEET_WIDTH = 8
+
+var map_id setget set_map_id
+var saven_id
 
 var map_size
 
@@ -18,16 +27,21 @@ var thread
 var chunks: Chunks
 var chunks_data: Dictionary setget set_chunks_data
 
+var trees = {}
+
 var is_generated = false
+
+onready var tree = preload("res://game_world/objects/plants/tree/tree.tscn")
+onready var dead_tree = preload("res://game_world/objects/plants/tree/dead_tree.tscn")
+onready var bush = preload("res://game_world/objects/plants/tree/bush.tscn")
 
 func _exit_tree():
 	if thread != null:
 		thread.wat_to_finish()
-
-func exit_loading():
 	remove_commands()
 
-func setup():
+func _ready():
+	add_to_group("Persist")
 	$Wall.GlobalNavigation = $Navigation
 	$Terrain.GlobalNavigation = $Navigation
 	
@@ -51,47 +65,58 @@ func setup():
 	update_tilemap()
 
 func add_commands():
-	Console.add_command("setterrain", self, "setterrain_cmd")\
+	Console.add_command("setterrain", self, "_setterrain_cmd")\
 	.set_description("Set terrain.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setpath", self, "setpath_cmd")\
+	Console.add_command("setpath", self, "_setpath_cmd")\
 	.set_description("Set path.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setfloor", self, "setfloor_cmd")\
+	Console.add_command("setfloor", self, "_setfloor_cmd")\
 	.set_description("Set floor.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setfence", self, "setfence_cmd")\
+	Console.add_command("setfence", self, "_setfence_cmd")\
 	.set_description("Set fence.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setwall", self, "setwall_cmd")\
+	Console.add_command("setwall", self, "_setwall_cmd")\
 	.set_description("Set wall.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setcell", self, "setcell_cmd")\
+	Console.add_command("setplant", self, "_setplant_cmd")\
+	.set_description("Set plant.")\
+	.add_argument("pos_x", TYPE_INT)\
+	.add_argument("pos_y", TYPE_INT)\
+	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("setcell", self, "_setcell_cmd")\
 	.set_description("Set cell.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("pos_z", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
+	.register()
+	
+	Console.add_command("updatetilemap", self, "_updatetilemap_cmd")\
+	.set_description("Update the tilemap.")\
 	.register()
 	
 func remove_commands():
@@ -100,9 +125,11 @@ func remove_commands():
 	Console.remove_command("setfloor")
 	Console.remove_command("setfence")
 	Console.remove_command("setwall")
+	Console.remove_command("setplant")
 	Console.remove_command("setcell")
+	Console.remove_command("updatetilemap")
 	
-func get_persist_data():
+func save():
 	var save_dict = {
 		"filename": get_filename(),
 		"parent" : get_parent().get_path(),
@@ -134,8 +161,10 @@ func update_tilemap():
 	$Path.update_bitmask_region()
 	$Wall.update_bitmask_region()
 	$Floor.update_bitmask_region()
+
+	Logger.info("Tilemaps' bitmask is updated.")
 	
-	Logger.info("Terrain's bitmask is updated.")
+	emit_signal("tilemap_updated")
 	
 	var final_time = OS.get_ticks_msec()
 	var final_memory_usage = OS.get_static_memory_peak_usage()
@@ -143,80 +172,12 @@ func update_tilemap():
 			str(((final_time as float) - (initial_time as float)) / 1000) + "s.")
 	Logger.info("The memory usage when drawing the "+ str(map_size) + "x map to Tilemaps is "
 			+ String.humanize_size(final_memory_usage - initial_memory_usage))
-
-func setterrain_cmd(x, y, tile):
-	set_cell(x, y, TERRAIN, tile)
-	Console.write_line("Terrain set at (" + str(x) + " " + str(y) + ")")
-
-func setpath_cmd(x, y, tile):
-	set_cell(x, y, PATH, tile)
-	Console.write_line("Path set at (" + str(x) + ", " + str(y) + ")")
 	
-func setfloor_cmd(x, y, tile):
-	set_cell(x, y, FLOOR, tile)
-	Console.write_line("Floor set at (" + str(x) + ", " + str(y) + ")")
-	
-func setfence_cmd(x, y, tile):
-	set_cell(x, y, FENCE, tile)
-	Console.write_line("Fence set at (" + str(x) + ", " + str(y) + ")")
-	
-func setwall_cmd(x, y, tile):
-	set_cell(x, y, WALL, tile)
-	Console.write_line("Wall set at (" + str(x) + ", " + str(y) + ")")
-	
-func setcell_cmd(x, y, z, tile):
-	set_cell(x, y, z, tile)
-	Console.write_line("Cell set at (" + str(x) + ", " + str(y) + ")")
-
 func set_cell(x, y, z, tile, update_bitmask = true):
 	var result = chunks.set_cell(x, y, z, tile)
 	
-	chunks.set_cell(x, y, z, tile)
-	
-	# BIG BIG BIG Todo: Detect if it is available to set the cell.
-	
-#	# Post process the map
-#	# First to remove the cells of wrong bitmasks
-#	var template1 = [
-#		LAND, LAND, WATER,
-#		LAND, LAND, LAND,
-#		WATER, LAND, LAND
-#	]
-#	var template2 = [
-#		WATER, LAND, LAND,
-#		LAND, LAND, LAND,
-#		LAND, LAND, WATER
-#	]
-#
-#	var _map_cache = []
-#	_map_cache.resize(5)
-#	for i in range(5):
-#		var _column_cache = []
-#		_column_cache.resize(5)
-#		_map_cache[i] = _column_cache
-#
-#	for i in range(5):
-#		for j in range(5):
-#			_map_cache[i][j] = chunks.get_cell(x - 2 + i, y - 2 + j, TERRAIN)
-#
-#	for i in range(x - 1, x + 2):
-#		for j in range(y - 1, y + 2):
-#			var nearby = [
-#				_map_cache[i - x][j - y], _map_cache[i - x + 1][j - y], _map_cache[i + 2 - x][j - y],
-#				_map_cache[i - x][j - y + 1], _map_cache[i - x + 1][j - y + 1], _map_cache[i + 2 - x][j - y + 1],
-#				_map_cache[i - x][j + 2 - y], _map_cache[i - x + 1][j + 2 - y], _map_cache[i + 2 - x][j + 2 - y]
-#			]
-#			print(Vector2(i, j), nearby)
-#			print(template2)
-#			print(nearby.hash() == template2.hash())
-#			if nearby.hash() == template1.hash() or nearby.hash() == template2.hash():
-#				for m in range(i - 1, i + 2):
-#					for n in range(j - 1, j + 2):
-#						chunks.set_cell(m, n, TERRAIN, tile)
-#						_draw_cell(m, n, TERRAIN, update_bitmask)
-#	print("===============")
-
 	_draw_cell(x, y, z, update_bitmask)
+	emit_signal("cell_set", Vector3(x, y, z), tile)
 	return result
 
 # This method does not check if the key exists in chunks
@@ -231,6 +192,8 @@ func generate(size):
 	
 	chunks.generate()
 	
+	emit_signal("map_generated")
+	
 	var final_time = OS.get_ticks_msec()
 	var final_memory_usage = OS.get_static_memory_peak_usage()
 	Logger.info("Finished generating a(n) "+ str(size) + "x map in " +
@@ -239,37 +202,73 @@ func generate(size):
 			String.humanize_size(final_memory_usage - initial_memory_usage))
 	return OK
 	
-	
+# Generate the identifier in the saven.
+func set_map_id(value):
+	map_id = value
+	saven_id = "Map#" + str(map_id)
+
 func _draw_cell(x, y, z, update_bitmask = true):
 	match z:
 		TERRAIN:
 			$Terrain.set_cell(x, y, get_cell(x, y, TERRAIN))
 			if update_bitmask:
-				$Terrain.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+				$Terrain.update_bitmask_area(Vector2(x, y))
 			return OK
 		PATH:
 			$Path.set_cell(x, y, get_cell(x, y, PATH))
 			if update_bitmask:
-				$Path.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+				$Path.update_bitmask_area(Vector2(x, y))
 			return OK
 		FLOOR:
 			$Floor.set_cell(x, y, get_cell(x, y, FLOOR))
 			if update_bitmask:
-				$Floor.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+				$Floor.update_bitmask_area(Vector2(x, y))
 			return OK
 		FENCE:
 			$Fence.set_cell(x, y, get_cell(x, y, FENCE))
 			if update_bitmask:
-				$Fence.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+				$Fence.update_bitmask_area(Vector2(x, y))
 			return OK
 		WALL:
 			$Wall.set_cell(x, y, get_cell(x, y, WALL))
 			if update_bitmask:
-				$Wall.update_bitmask_region(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+				$Wall.update_bitmask_area(Vector2(x, y))
+			return OK
+		PLANT:
+			match get_cell(x, y, PLANT):
+				TREE:
+					_add_plant(TREE, x, y)
+				DEAD_TREE:
+					_add_plant(DEAD_TREE, x, y)
+				BUSH:
+					_add_plant(BUSH, x, y)
+				_:
+					_remove_plant(x, y)
 			return OK
 		_:
 			return ERR_DOES_NOT_EXIST
 			
+func _add_plant(plant_type, pos_x, pos_y):
+	var tree_node
+	
+	if not trees.has(Vector2(pos_x, pos_y)):
+		match plant_type:
+			TREE:
+				tree_node = tree.instance()
+			DEAD_TREE:
+				tree_node = dead_tree.instance()
+			BUSH:
+				tree_node = bush.instance()
+				
+		trees[Vector2(pos_x, pos_y)] = tree_node
+		tree_node.position = Vector2(pos_x * TEXTURE_SHEET_WIDTH, pos_y * TEXTURE_SHEET_WIDTH)
+		$Trees.add_child(tree_node)
+		
+func _remove_plant(pos_x, pos_y):
+	if trees.has(Vector2(pos_x, pos_y)):
+		trees[Vector2(pos_x, pos_y)].queue_free()
+		trees.erase(Vector2(pos_x, pos_y))
+		
 func _draw_chunks(update_bitmask = false):
 	for position in chunks.get_all_cells().keys():
 		# This is for an unknow bug.
@@ -281,8 +280,50 @@ func _draw_chunks(update_bitmask = false):
 			_draw_cell(position.x, position.y, FENCE, update_bitmask)
 		if position.z == WALL:
 			_draw_cell(position.x, position.y, WALL, update_bitmask)
+		if position.z == PLANT:
+			_draw_cell(position.x, position.y, PLANT, update_bitmask)
 			
 	for i in range(chunks.map_size):
 		for j in range(chunks.map_size):
 			_draw_cell(i, j, TERRAIN, update_bitmask)
 	return OK
+
+func _setterrain_cmd(x, y, tile):
+	set_cell(x, y, TERRAIN, tile)
+	Console.write_line("Terrain set at (" + str(x) + " " + str(y) + ")")
+	Logger.info("Terrain set at (" + str(x) + " " + str(y) + ")")
+
+func _setpath_cmd(x, y, tile):
+	set_cell(x, y, PATH, tile)
+	Console.write_line("Path set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Path set at (" + str(x) + ", " + str(y) + ")")
+	
+func _setfloor_cmd(x, y, tile):
+	set_cell(x, y, FLOOR, tile)
+	Console.write_line("Floor set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Floor set at (" + str(x) + ", " + str(y) + ")")
+	
+func _setfence_cmd(x, y, tile):
+	set_cell(x, y, FENCE, tile)
+	Console.write_line("Fence set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Fence set at (" + str(x) + ", " + str(y) + ")")
+	
+func _setwall_cmd(x, y, tile):
+	set_cell(x, y, WALL, tile)
+	Console.write_line("Wall set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Wall set at (" + str(x) + ", " + str(y) + ")")
+	
+func _setplant_cmd(x, y, tile):
+	set_cell(x, y, PLANT, tile)
+	Console.write_line("Plant set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Plant set at (" + str(x) + ", " + str(y) + ")")
+	
+func _setcell_cmd(x, y, z, tile):
+	set_cell(x, y, z, tile)
+	Console.write_line("Cell set at (" + str(x) + ", " + str(y) + ")")
+	Logger.info("Cell set at (" + str(x) + ", " + str(y) + ")")
+	
+func _updatetilemap_cmd():
+	update_tilemap()
+	Console.write_line("Tilemaps updated.")
+	Logger.info("Tilemaps updated.")

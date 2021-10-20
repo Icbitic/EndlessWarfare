@@ -82,4 +82,4 @@ func _list_commands():
 # @returns  void
 func _quit():
 	self._console.Log.warn('Quitting application...')
-	self._console.get_tree().quit()
+	self._console.get_tree().notification(MainLoop.NOTIFICATION_WM_QUIT_REQUEST)

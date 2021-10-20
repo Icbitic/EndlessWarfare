@@ -1,23 +1,28 @@
 class_name TerrainGenerator
-extends Node
+extends Resource
 
-enum {TERRAIN, PATH, FLOOR, FENCE, WALL}
+enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
 enum {LAND, WATER}
 enum {DIRT_ROAD, STONE_ROAD}
 enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
 enum {BLACK_WALL}
+enum {TREE, DEAD_TREE, BUSH}
 
 const CHUNK_SIZE = 16
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 
 const LAND_THRESHOLD = -0.35
 
+const TREE_DENSITY = 0.05
+const TREE_DEATH_RATE = 0.05
+
+const BUSH_DENSITY = 0.02
+
 var map_size_default = Settings.map_size
 
 # The map_size is in cells.
 # The map_size is 256 by default.
 var map_size = 256
-
 var map_midpoint = Vector2(0.5, 0.5) * map_size
 
 func _ready():
@@ -51,17 +56,48 @@ func generate(chunks):
 				if not chunks.get_cell(i, j, TERRAIN) == LAND:
 					chunks.set_cell(i, j, TERRAIN, WATER)
 	
+	# Plant trees
+	# warning-ignore:unused_variable
+	for i in range(map_size * map_size * TREE_DENSITY):
+		var pos_x = int(rand_range(0, map_size))
+		var pos_y = int(rand_range(0, map_size))
+		var is_surrounded = true
+		for x in range(pos_x - 2, pos_x + 3):
+			for y in range(pos_y - 2, pos_y + 3):
+				if x >= 0 and x < map_size and y >= 0 and y < map_size:
+					if not chunks.get_cell(x, y, TERRAIN) == LAND:
+						is_surrounded = false
+		if is_surrounded and chunks.is_cell_empty(pos_x, pos_y):
+			if randf() < TREE_DEATH_RATE:
+				chunks.set_cell(pos_x, pos_y, PLANT, DEAD_TREE)
+			else:
+				chunks.set_cell(pos_x, pos_y, PLANT, TREE)
+	
+	# Add Bushes
+	# warning-ignore:unused_variable
+	for i in range(map_size * map_size * BUSH_DENSITY):
+		var pos_x = int(rand_range(0, map_size))
+		var pos_y = int(rand_range(0, map_size))
+		var is_surrounded = true
+		for x in range(pos_x - 2, pos_x + 3):
+			for y in range(pos_y - 2, pos_y + 3):
+				if x >= 0 and x < map_size and y >= 0 and y < map_size:
+					if not chunks.get_cell(x, y, TERRAIN) == LAND:
+						is_surrounded = false
+		if is_surrounded and chunks.is_cell_empty(pos_x, pos_y):
+			chunks.set_cell(pos_x, pos_y, PLANT, BUSH)
+	
 	# Post process the map
 	# First to remove the cells of wrong bitmasks
 	var template1 = [
-		LAND, LAND, WATER,
+		LAND, WATER, LAND,
 		LAND, LAND, LAND,
-		WATER, LAND, LAND
+		LAND, WATER, LAND
 	]
 	var template2 = [
-		WATER, LAND, LAND,
 		LAND, LAND, LAND,
-		LAND, LAND, WATER
+		WATER, LAND, WATER,
+		LAND, LAND, LAND
 	]
 	
 	# Create a cache array of the map to access data more quickly.
