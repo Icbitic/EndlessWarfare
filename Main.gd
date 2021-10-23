@@ -12,9 +12,9 @@ onready var camera = preload("res://game_world/camera.tscn")
 
 var map_amount = 0
 
-const ignore_data = [
+const ignore_keys = [
 	"filename", "parent"
-	]
+]
 
 func _ready():
 	#var file = File.new()
@@ -24,6 +24,8 @@ func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
+	_register_cells()
+	
 	_load_mods_to_project()
 	var load_res = load_game()
 	
@@ -32,13 +34,124 @@ func _ready():
 			var map_node = map.instance()
 			map_node.map_id = map_amount
 			map_amount += 1
+			map_node.generate()
 			$World.add_child(map_node)
 			add_child(test.instance())
 			$Test.add_child(test2.instance())
 			add_child(camera.instance())
+			
 			_add_packs_to_scene_tree()
 			
+	_add_commands()
+
+func _notification(what):
+	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+		Logger.info("Received quit request.")
+		if Settings.save_before_quit:
+			save_game()
+		get_tree().quit()
+
+# Note: This can be called from anywhere inside the tree. This function
+# is path independent.
+func load_game():
+	# We need to revert the game state so we're not cloning objects
+	# during loading. This will vary wildly depending on the needs of a
+	# project, so take care with this step.
+	# For our example, we will accomplish this by deleting saveable objects.
+	var save_nodes = get_tree().get_nodes_in_group("Persist")
+		
+	for i in range(save_nodes.size() - 1, -1, -1):
+		#print(save_nodes[i].get_path())
+		save_nodes[i].queue_free()
+		yield(save_nodes[i], "tree_exited")
 	
+	var res = _search_savens("user://test_saven")
+	_load_file(res)
+	
+	_load_mapping_file()
+	if OS.is_debug_build() and typeof(res) == TYPE_STRING:
+		# Test the game functions to check if they are OK. 
+		$Test.test()
+	
+	
+	emit_signal("game_loaded")
+	
+	return res
+
+# Note: This can be called from anywhere inside the tree. This function is
+# path independent.
+# Go through everything in the persist category and ask them to return a
+# dict of relevant variables.
+func save_game():
+	var save_nodes = _get_node_in_group_in_order("Persist")
+	
+	var path = Settings.saven_path.plus_file("saven.ews")
+	Logger.info("Saving game to " + path)
+	var save_game = File.new()
+	if save_game.open(path, File.WRITE) == ERR_FILE_NOT_FOUND:
+		var dir = Directory.new()
+		dir.open("user://")
+		dir.make_dir(Settings.saven_path)
+		
+	save_game.open(path, File.WRITE)
+	
+	var save_dict = {}
+	
+	var order = 0
+	for node in save_nodes:
+		# Store the save dictionary as a new line in the save file.
+		# Check the node is an instanced scene so it can be instanced again during load.
+		if node.filename.empty():
+			Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
+			continue
+
+		# Check the node has a save function.
+		if !node.has_method("save"):
+			Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
+			continue
+		# Call the node's save function.
+		save_dict[order] = node.call("save")
+		order += 1
+		
+	save_game.store_line(to_json(save_dict))
+	save_game.close()
+	emit_signal("game_saved")
+	Logger.info("Game was saved to " + path)
+	
+	_save_mapping()
+
+func _get_node_in_group_in_order(group, nodes = [], node = self):
+	for i in node.get_children():
+		if i.is_in_group("Persist"):
+			nodes.append(i)
+	for i in node.get_children():
+		nodes = _get_node_in_group_in_order(group, nodes, i)
+	return nodes
+
+func _save_mapping():
+	var path = Settings.saven_path.plus_file("mapping.ews")
+	var save_mapping = File.new()
+	save_mapping.open(path, File.WRITE)
+	save_mapping.store_line(to_json(CellController.save()))
+	save_mapping.close()
+	return OK
+
+func _register_cells():
+	CellController.add_cell("LAND", 0)
+	CellController.add_cell("WATER", 1)
+	CellController.add_cell("DIRT_ROAD", 1)
+	CellController.add_cell("STONE_ROAD", 2)
+	CellController.add_cell("CEMENT_ROAD", 3)
+	CellController.add_cell("MUD_ROAD", 4)
+	CellController.add_cell("CLEAN_FLOOR", 1)
+	CellController.add_cell("CRACKED_FLOOR", 2)
+	CellController.add_cell("CRACKED_FLOOR2", 3)
+	CellController.add_cell("BLACK_WALL", 0)
+	CellController.add_cell("TREE", 0)
+	CellController.add_cell("DEAD_TREE", 1)
+	CellController.add_cell("BUSH", 2)
+	
+func _add_commands():
 	Console.add_command("loadmods", self, "_loadmods_cmd")\
 	.set_description("Load .pck files in mods folder.")\
 	.register()
@@ -71,80 +184,6 @@ func _ready():
 	.set_description("List orphan nodes.")\
 	.register()
 	
-
-func _notification(what):
-	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
-		Logger.info("Received quit request.")
-		if Settings.save_before_quit:
-			save_game()
-		get_tree().quit()
-
-# Note: This can be called from anywhere inside the tree. This function
-# is path independent.
-func load_game():
-	# We need to revert the game state so we're not cloning objects
-	# during loading. This will vary wildly depending on the needs of a
-	# project, so take care with this step.
-	# For our example, we will accomplish this by deleting saveable objects.
-	var save_nodes = get_tree().get_nodes_in_group("Persist")
-		
-	for i in range(save_nodes.size() - 1, -1, -1):
-		#print(save_nodes[i].get_path())
-		save_nodes[i].queue_free()
-		yield(save_nodes[i], "tree_exited")
-	
-	var res = _search_savens("user://test_saven")
-	_load_file(res)
-	
-	if OS.is_debug_build() and typeof(res) == TYPE_STRING:
-		# Test the game functions to check if they are OK. 
-		$Test.test()
-	
-	emit_signal("game_loaded")
-	
-	return res
-
-# Note: This can be called from anywhere inside the tree. This function is
-# path independent.
-# Go through everything in the persist category and ask them to return a
-# dict of relevant variables.
-func save_game():
-	var save_nodes = get_tree().get_nodes_in_group("Persist")
-	
-	var path = Settings.saven_path.plus_file("saven.ews")
-	Logger.info("Saving game to " + path)
-	var save_game = File.new()
-	if save_game.open(path, File.WRITE) == ERR_FILE_NOT_FOUND:
-		var dir = Directory.new()
-		dir.open("user://")
-		dir.make_dir(Settings.saven_path)
-		
-	save_game.open(path, File.WRITE)
-	
-	var save_dict = {}
-	
-	for node in save_nodes:
-		# Store the save dictionary as a new line in the save file.
-		# Check the node is an instanced scene so it can be instanced again during load.
-		if node.filename.empty():
-			Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
-			continue
-
-		# Check the node has a save function.
-		if !node.has_method("save"):
-			Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
-			continue
-		# Call the node's save function.
-		var saven_id = node.get("saven_id")
-		if saven_id == null:
-			save_dict[node.name] = node.call("save")
-		else:
-			save_dict[saven_id] = node.call("save")
-		
-	save_game.store_line(to_json(save_dict))
-	save_game.close()
-	emit_signal("game_saved")
-	Logger.info("Game was saved to " + path)
 
 func _load_mods_to_project():
 	Logger.info("Starting loading mods.")
@@ -190,7 +229,7 @@ func _search_savens(path):
 func _load_node(node, node_data):
 	# Now we set the r.keys():
 	for i in node_data.keys():
-		if ignore_data.has(i):
+		if ignore_keys.has(i):
 			continue
 			
 		if typeof(node_data[i]) == TYPE_STRING:
@@ -227,6 +266,23 @@ func _load_file(path):
 			
 	save_game.close()
 	Logger.info("Game data was loaded from " + path)
+	return res
+
+func _load_mapping_file():
+	var path = Settings.saven_path.plus_file("mapping.ews")
+	Logger.info("Loading mapping data from " + path)
+	var save_mapping = File.new()
+	var res = save_mapping.open(path, File.READ)
+	if res == OK:
+		var mapping: Dictionary = parse_json(save_mapping.get_line())
+		
+		for i in mapping.keys():
+			CellController.set(i, mapping[i])
+		
+		save_mapping.close()
+		Logger.info("Game mapping data was loaded from " + path)
+	else:
+		Logger.info("Can't open" + path)
 	return res
 
 func _get_all_children(node = self, children: Array = []):

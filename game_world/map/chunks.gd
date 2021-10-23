@@ -1,12 +1,6 @@
 class_name Chunks
 extends Resource
 
-enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
-enum {LAND, WATER}
-enum {DIRT_ROAD, STONE_ROAD}
-enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
-enum {BLACK_WALL}
-enum {TREE, DEAD_TREE, BUSH}
 
 const CHUNK_SIZE = 16
 
@@ -46,7 +40,7 @@ func getterrian():
 	return terrian
 	
 func set_cell(x, y, z, tile):
-	if z == TERRAIN:
+	if z == Settings.TERRAIN:
 		terrian[x][y] = tile
 		return OK
 	else:
@@ -56,55 +50,55 @@ func set_cell(x, y, z, tile):
 # This method does not check if the key exists in chunks
 # If the key does not exist in chunks, the program will CRASH!!!
 func get_cell(x, y, z):
-	if z == TERRAIN:
+	if z == Settings.TERRAIN:
 		return terrian[x][y]
 	else:
 		var res = objects[Vector3(x, y, z)]
 		return int(res)
 
 func has_cell(x, y, z):
-	if z == TERRAIN:
+	if z == Settings.TERRAIN:
 		return true
 	else:
 		return objects.has(Vector3(x, y, z))
 		
 func has_fixed_objects(x, y):
-	if objects.has(Vector3(x, y, PATH)):
-		if not objects[Vector3(x, y, PATH)] == -1:
+	if objects.has(Vector3(x, y, Settings.PATH)):
+		if not objects[Vector3(x, y, Settings.PATH)] == -1:
 			return false
 			
-	if objects.has(Vector3(x, y, FLOOR)):
-		if not objects[Vector3(x, y, FLOOR)] == -1:
+	if objects.has(Vector3(x, y, Settings.FLOOR)):
+		if not objects[Vector3(x, y, Settings.FLOOR)] == -1:
 			return false
 			
-	if objects.has(Vector3(x, y, FENCE)):
-		if not objects[Vector3(x, y, FENCE)] == -1:
+	if objects.has(Vector3(x, y, Settings.FENCE)):
+		if not objects[Vector3(x, y, Settings.FENCE)] == -1:
 			return false
 			
-	if objects.has(Vector3(x, y, WALL)):
-		if not objects[Vector3(x, y, WALL)] == -1:
+	if objects.has(Vector3(x, y, Settings.WALL)):
+		if not objects[Vector3(x, y, Settings.WALL)] == -1:
 			return false
 			
-	if objects.has(Vector3(x, y, PLANT)):
-		if not objects[Vector3(x, y, PLANT)] == -1:
+	if objects.has(Vector3(x, y, Settings.PLANT)):
+		if not objects[Vector3(x, y, Settings.PLANT)] == -1:
 			return false
 	return true
 	
 func clear_fixed_object(pos: Vector2):
-	if objects.has(Vector3(pos.x, pos.y, PATH)):
-		objects[Vector3(pos.x, pos.y, PATH)] = -1
+	if objects.has(Vector3(pos.x, pos.y, Settings.PATH)):
+		objects[Vector3(pos.x, pos.y, Settings.PATH)] = -1
 		
-	if objects.has(Vector3(pos.x, pos.y, FLOOR)):
-		objects[Vector3(pos.x, pos.y, FLOOR)] = -1
+	if objects.has(Vector3(pos.x, pos.y, Settings.FLOOR)):
+		objects[Vector3(pos.x, pos.y, Settings.FLOOR)] = -1
 		
-	if objects.has(Vector3(pos.x, pos.y, FENCE)):
-		objects[Vector3(pos.x, pos.y, FENCE)] = -1
+	if objects.has(Vector3(pos.x, pos.y, Settings.FENCE)):
+		objects[Vector3(pos.x, pos.y, Settings.FENCE)] = -1
 		
-	if objects.has(Vector3(pos.x, pos.y, WALL)):
-		objects[Vector3(pos.x, pos.y, WALL)] = -1
+	if objects.has(Vector3(pos.x, pos.y, Settings.WALL)):
+		objects[Vector3(pos.x, pos.y, Settings.WALL)] = -1
 		
-	if objects.has(Vector3(pos.x, pos.y, PLANT)):
-		objects[Vector3(pos.x, pos.y, PLANT)] = -1
+	if objects.has(Vector3(pos.x, pos.y, Settings.PLANT)):
+		objects[Vector3(pos.x, pos.y, Settings.PLANT)] = -1
 	return OK
 	
 func generate():

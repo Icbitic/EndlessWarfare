@@ -5,6 +5,6 @@ var player
 
 func _ready():
 	player = get_node("Players/" + str(player_id))
-
+	
 func get_navigation():
 	return $Navigation

@@ -1,5 +1,12 @@
 extends Node
 
+enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
+enum {LAND, WATER}
+enum {DIRT_ROAD, STONE_ROAD, CEMENT_ROAD, MUD_ROAD}
+enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
+enum {BLACK_WALL}
+enum {TREE, DEAD_TREE, BUSH}
+
 var version = "0.2.1"
 
 var map_size = 256

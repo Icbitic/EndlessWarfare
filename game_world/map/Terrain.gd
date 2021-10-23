@@ -1,6 +1,5 @@
 extends PlaneMap
 
-enum {LAND, WATER}
 
 var GlobalNavigation
 

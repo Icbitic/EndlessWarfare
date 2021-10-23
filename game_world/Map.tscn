@@ -12,7 +12,7 @@
 [ext_resource path="res://tilesets/floor.tres" type="TileSet" id=10]
 [ext_resource path="res://tilesets/fence.tres" type="TileSet" id=11]
 
-[node name="Map" type="Node"]
+[node name="Map" type="Node2D"]
 script = ExtResource( 4 )
 
 [node name="Navigation" parent="." instance=ExtResource( 7 )]
@@ -41,15 +41,15 @@ cell_size = Vector2( 8, 8 )
 format = 1
 script = ExtResource( 3 )
 
+[node name="Shadow" type="TileMap" parent="."]
+tile_set = ExtResource( 8 )
+cell_size = Vector2( 8, 8 )
+format = 1
+
 [node name="Wall" type="TileMap" parent="."]
 tile_set = ExtResource( 5 )
 cell_size = Vector2( 8, 8 )
 format = 1
 script = ExtResource( 6 )
-
-[node name="Shadow" type="TileMap" parent="."]
-tile_set = ExtResource( 8 )
-cell_size = Vector2( 8, 8 )
-format = 1
 
 [node name="Trees" type="YSort" parent="."]

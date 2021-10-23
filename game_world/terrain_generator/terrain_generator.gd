@@ -1,12 +1,6 @@
 class_name TerrainGenerator
 extends Resource
 
-enum {TERRAIN, PATH, FLOOR, FENCE, WALL, PLANT}
-enum {LAND, WATER}
-enum {DIRT_ROAD, STONE_ROAD}
-enum {CLEAN_FLOOR, CRACKED_FLOOR, CRACKED_FLOOR2}
-enum {BLACK_WALL}
-enum {TREE, DEAD_TREE, BUSH}
 
 const CHUNK_SIZE = 16
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
@@ -51,10 +45,10 @@ func generate(chunks):
 				for m in range(i - 1, i + 2):
 					for n in range(j - 1, j + 2):
 						if (m >= 0 and m <= map_size - 1) and (n >= 0 and n <= map_size - 1):
-							chunks.set_cell(m, n, TERRAIN, LAND)
+							chunks.set_cell(m, n, Settings.TERRAIN, Settings.LAND)
 			else:
-				if not chunks.get_cell(i, j, TERRAIN) == LAND:
-					chunks.set_cell(i, j, TERRAIN, WATER)
+				if not chunks.get_cell(i, j, Settings.TERRAIN) == Settings.LAND:
+					chunks.set_cell(i, j, Settings.TERRAIN, Settings.WATER)
 	
 	# Plant trees
 	# warning-ignore:unused_variable
@@ -65,13 +59,13 @@ func generate(chunks):
 		for x in range(pos_x - 2, pos_x + 3):
 			for y in range(pos_y - 2, pos_y + 3):
 				if x >= 0 and x < map_size and y >= 0 and y < map_size:
-					if not chunks.get_cell(x, y, TERRAIN) == LAND:
+					if not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND:
 						is_surrounded = false
 		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
 			if randf() < TREE_DEATH_RATE:
-				chunks.set_cell(pos_x, pos_y, PLANT, DEAD_TREE)
+				chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.DEAD_TREE)
 			else:
-				chunks.set_cell(pos_x, pos_y, PLANT, TREE)
+				chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.TREE)
 	
 	# Add Bushes
 	# warning-ignore:unused_variable
@@ -82,22 +76,22 @@ func generate(chunks):
 		for x in range(pos_x - 2, pos_x + 3):
 			for y in range(pos_y - 2, pos_y + 3):
 				if x >= 0 and x < map_size and y >= 0 and y < map_size:
-					if not chunks.get_cell(x, y, TERRAIN) == LAND:
+					if not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND:
 						is_surrounded = false
 		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
-			chunks.set_cell(pos_x, pos_y, PLANT, BUSH)
+			chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.BUSH)
 	
 	# Post process the map
 	# First to remove the cells of wrong bitmasks
 	var template1 = [
-		LAND, WATER, LAND,
-		LAND, LAND, LAND,
-		LAND, WATER, LAND
+		Settings.LAND, Settings.WATER, Settings.LAND,
+		Settings.LAND, Settings.LAND, Settings.LAND,
+		Settings.LAND, Settings.WATER, Settings.LAND
 	]
 	var template2 = [
-		LAND, LAND, LAND,
-		WATER, LAND, WATER,
-		LAND, LAND, LAND
+		Settings.LAND, Settings.LAND, Settings.LAND,
+		Settings.WATER, Settings.LAND, Settings.WATER,
+		Settings.LAND, Settings.LAND, Settings.LAND
 	]
 	
 	# Create a cache array of the map to access data more quickly.
@@ -113,7 +107,7 @@ func generate(chunks):
 
 	for i in range(map_size):
 		for j in range(map_size):
-			_map_cache[i][j] = chunks.get_cell(i, j, TERRAIN)
+			_map_cache[i][j] = chunks.get_cell(i, j, Settings.TERRAIN)
 
 	# The edge of the map must be WATER, so we don't need to care about them
 	for i in range(1, map_size - 1):
@@ -127,7 +121,7 @@ func generate(chunks):
 					nearby.hash() == template2.hash()):
 				for m in range(i - 1, i + 2):
 					for n in range(j - 1, j + 2):
-						chunks.set_cell(m, n, TERRAIN, LAND)
+						chunks.set_cell(m, n, Settings.TERRAIN, Settings.LAND)
 	return OK
 
 
