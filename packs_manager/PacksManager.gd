@@ -17,12 +17,12 @@ var packs = {}
 
 # Public Methods
 
-func load_packs(path):
+func import_packs(path):
 	# Don't send res:// here
 	emit_signal("packs_loaded")
 	return _import_packs(path)
 
-func load_off():
+func clear_loaded_packs():
 	Logger.info("All packs are loaded off.")
 	var amount = packs.size()
 	packs = {}
@@ -76,6 +76,10 @@ func _import_packs(path, intended = false):
 							"is_enabled": info.is_enabled
 						}
 						
+						if pack_data.is_enabled and not ProjectSettings.load_resource_pack(pack_data.path):
+							Logger.error("Error occurred when trying to load " + pack_data.path, ERR_CANT_RESOLVE)
+							break
+							
 #						var package = Pack.new()
 #						package.setup_data(pack_data)
 						

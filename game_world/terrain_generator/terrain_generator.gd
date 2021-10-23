@@ -67,7 +67,7 @@ func generate(chunks):
 				if x >= 0 and x < map_size and y >= 0 and y < map_size:
 					if not chunks.get_cell(x, y, TERRAIN) == LAND:
 						is_surrounded = false
-		if is_surrounded and chunks.is_cell_empty(pos_x, pos_y):
+		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
 			if randf() < TREE_DEATH_RATE:
 				chunks.set_cell(pos_x, pos_y, PLANT, DEAD_TREE)
 			else:
@@ -84,7 +84,7 @@ func generate(chunks):
 				if x >= 0 and x < map_size and y >= 0 and y < map_size:
 					if not chunks.get_cell(x, y, TERRAIN) == LAND:
 						is_surrounded = false
-		if is_surrounded and chunks.is_cell_empty(pos_x, pos_y):
+		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
 			chunks.set_cell(pos_x, pos_y, PLANT, BUSH)
 	
 	# Post process the map

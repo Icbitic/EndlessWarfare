@@ -48,6 +48,8 @@ func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, aut
 		GlobalNavigation.remove_cell(x, y)
 	.set_cell(x, y, tile, flip_x, flip_y, transpose, autotile_coord)
 
+# When I write this, Only god and I know how the code runs.
+# Now, Only God knows.
 func update_shadow(x, y):
 	if get_cell(x, y) != -1:
 		return

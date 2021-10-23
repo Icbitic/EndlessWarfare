@@ -24,8 +24,9 @@ func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
+	_load_mods_to_project()
 	var load_res = load_game()
-
+	
 	if typeof(load_res) == TYPE_INT:
 		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
 			var map_node = map.instance()
@@ -35,8 +36,8 @@ func _ready():
 			add_child(test.instance())
 			$Test.add_child(test2.instance())
 			add_child(camera.instance())
+			_add_packs_to_scene_tree()
 			
-	load_mods()
 	
 	Console.add_command("loadmods", self, "_loadmods_cmd")\
 	.set_description("Load .pck files in mods folder.")\
@@ -127,10 +128,12 @@ func save_game():
 		# Check the node is an instanced scene so it can be instanced again during load.
 		if node.filename.empty():
 			Logger.warn("persistent node '%s' is not an instanced scene, skipped" % node.name)
+			continue
 
 		# Check the node has a save function.
 		if !node.has_method("save"):
 			Logger.warn("persistent node '%s' is missing a save() function, skipped" % node.name)
+			continue
 		# Call the node's save function.
 		var saven_id = node.get("saven_id")
 		if saven_id == null:
@@ -143,31 +146,28 @@ func save_game():
 	emit_signal("game_saved")
 	Logger.info("Game was saved to " + path)
 
-func load_mods():
+func _load_mods_to_project():
 	Logger.info("Starting loading mods.")
-	if $PacksManager.load_packs("mods") == OK:
+	if $PacksManager.import_packs("mods") == OK:
 		Logger.info(str($PacksManager.get_packs().size()) + " mod(s) are loaded successfully.")
-		packs = $PacksManager.get_packs()
-		
-		for i in packs.keys():
-			if Settings.check_compatibility(packs[i].version_support) == false:
-				Logger.warn("Warning! " + packs[i].name + " is not compatible with this version")
-			# Todo: put an enable option condition here
-			elif packs[i].is_enabled:
-				if not ProjectSettings.load_resource_pack(packs[i].path):
-					Logger.error("Error occurred when trying to load " + packs[i].path, ERR_CANT_RESOLVE)
-					break
-				var scene = load("res://" + packs[i].name.plus_file(packs[i].name + ".tscn"))
-				packs[i].scene = scene
-				var node = scene.instance()
-				self.add_child(node)
-				Logger.info("Mod actived: " + packs[i].name + ".")
-	
 	# Return the amount of mods.
 	return $PacksManager.get_packs().size()
 
-func load_off():
-	return $PacksManager.load_off()
+func _clear_loaded_packs():
+	return $PacksManager.clear_loaded_packs()
+	
+func _add_packs_to_scene_tree():
+	packs = $PacksManager.get_packs()
+	
+	for i in packs.keys():
+		if Settings.check_compatibility(packs[i].version_support) == false:
+			Logger.warn("Warning! " + packs[i].name + " is not compatible with this version")
+		elif packs[i].is_enabled:
+			var scene = load("res://" + packs[i].name.plus_file(packs[i].name + ".tscn"))
+			packs[i].scene = scene
+			var node = scene.instance()
+			self.add_child(node)
+			Logger.info("Mod actived: " + packs[i].name + ".")
 	
 func _search_savens(path):
 	var dir = Directory.new()
@@ -203,9 +203,6 @@ func _load_node(node, node_data):
 				node.set(i, Vector2(pos[0].to_float(), pos[1].to_float()))
 				continue
 		node.set(i, node_data[i])
-		
-	if node.has_method("setup"):
-		node.call("setup")
 
 func _load_file(path):
 	# Path is ERR_*.
@@ -227,7 +224,6 @@ func _load_file(path):
 		var new_object: Node = load(node_data[node]["filename"]).instance()
 		_load_node(new_object, node_data[node])
 		get_node(node_data[node]["parent"]).add_child(new_object)
-	
 			
 	save_game.close()
 	Logger.info("Game data was loaded from " + path)
@@ -241,10 +237,10 @@ func _get_all_children(node = self, children: Array = []):
 	return children
 
 func _loadmods_cmd():
-	Console.write_line(str(load_mods()) + " mod(s) are loaded successfully.")
+	Console.write_line(str(_load_mods_to_project()) + " mod(s) are loaded successfully.")
 
 func _loadoff_cmd():
-	Console.write_line(str(load_off()) + " mod(s) are loaded off.")
+	Console.write_line(str(_clear_loaded_packs()) + " mod(s) are loaded off.")
 
 func _listmods_cmd():
 	Console.write_line($PacksManager.list_mods())
