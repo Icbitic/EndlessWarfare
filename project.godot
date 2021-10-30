@@ -19,10 +19,10 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://game_world/map/chunks.gd"
 }, {
-"base": "Node2D",
+"base": "Reference",
 "class": "Database",
 "language": "GDScript",
-"path": "res://game_world/database.gd"
+"path": "res://game_world/Database.gd"
 }, {
 "base": "Node",
 "class": "Pack",
