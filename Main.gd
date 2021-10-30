@@ -136,20 +136,20 @@ func _save_mapping():
 	return OK
 
 func _register_cells():
-	CellController.add_cell("LAND")
-	CellController.add_cell("WATER")
-	CellController.add_cell("DIRT_ROAD")
-	CellController.add_cell("STONE_ROAD")
-	CellController.add_cell("CEMENT_ROAD")
-	CellController.add_cell("MUD_ROAD")
-	CellController.add_cell("CLEAN_FLOOR")
-	CellController.add_cell("CRACKED_FLOOR")
-	CellController.add_cell("CRACKED_FLOOR2")
-	CellController.add_cell("BLACK_WALL")
-	CellController.add_cell("FENCE")
-	CellController.add_cell("TREE")
-	CellController.add_cell("DEAD_TREE")
-	CellController.add_cell("BUSH")
+	CellController.add_cell("LAND", Settings.TERRAIN)
+	CellController.add_cell("WATER", Settings.TERRAIN)
+	CellController.add_cell("DIRT_ROAD", Settings.PATH)
+	CellController.add_cell("STONE_ROAD", Settings.PATH)
+	CellController.add_cell("CEMENT_ROAD", Settings.PATH)
+	CellController.add_cell("MUD_ROAD", Settings.PATH)
+	CellController.add_cell("CLEAN_FLOOR", Settings.FLOOR)
+	CellController.add_cell("CRACKED_FLOOR", Settings.FLOOR)
+	CellController.add_cell("CRACKED_FLOOR2", Settings.FLOOR)
+	CellController.add_cell("WOODDEN_FENCE", Settings.FENCE)
+	CellController.add_cell("BLACK_WALL", Settings.WALL)
+	CellController.add_cell("TREE", Settings.PLANT)
+	CellController.add_cell("DEAD_TREE", Settings.PLANT)
+	CellController.add_cell("BUSH", Settings.PLANT)
 	
 func _add_commands():
 	Console.add_command("loadmods", self, "_loadmods_cmd")\

@@ -23,7 +23,6 @@ var chunks_data: Dictionary setget _set_chunks_data
 var is_first_generated = false
 
 var is_pen_down = false
-var pen_layer = Settings.WALL
 var pen_tile = -1
 
 onready var tree = preload("res://game_world/objects/plants/tree.tscn")
@@ -53,7 +52,7 @@ func _ready():
 func _unhandled_input(event):
 	if event.is_action_pressed("construct") and is_pen_down:
 		var pos = $Terrain.world_to_map(get_global_mouse_position())
-		set_cell(pos.x, pos.y, pen_layer, pen_tile)
+		set_cell(pos.x, pos.y, pen_tile)
 		get_tree().set_input_as_handled()
 
 # Public Methods
@@ -79,7 +78,8 @@ func save():
 	}
 	return save_dict
 
-func set_cell(x, y, z, tile, update_plants = true, update_bitmask = true):
+func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
+	var z = CellController.get_layer_by_id(tile)
 	if z == Settings.WALL:
 		_remove_fixed_objects(Vector2(x, y), Vector2(x, y))
 	if z == Settings.TERRAIN and tile == Settings.WATER:
@@ -384,11 +384,6 @@ func _add_commands():
 	.set_description("Pen down.")\
 	.register()
 	
-	Console.add_command("penl", self, "_penlayer_cmd")\
-	.add_argument("layer", TYPE_INT)\
-	.set_description("Set pen layer")\
-	.register()
-	
 	Console.add_command("pent", self, "_pentile_cmd")\
 	.add_argument("tile", TYPE_INT)\
 	.set_description("Set pen tile")\
@@ -405,7 +400,6 @@ func _remove_commands():
 	Console.remove_command("updatemap")
 	Console.remove_command("penu")
 	Console.remove_command("pend")
-	Console.remove_command("penl")
 	Console.remove_command("pent")
 	
 func _setterrain_cmd(x, y, tile):
@@ -456,10 +450,7 @@ func _pendown_cmd():
 	is_pen_down = true
 	Console.write_line("Pen down")
 	
-func _penlayer_cmd(layer):
-	pen_layer = layer
-	Console.write_line("Pen layer set to " + str(layer))
-	
 func _pentile_cmd(tile):
 	pen_tile = tile
-	Console.write_line("Pen tile set to " + str(tile))
+	Console.write_line("Pen tile set to " + CellController.get_name_by_id(tile) +
+			": " + str(tile))
