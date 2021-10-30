@@ -88,3 +88,9 @@ func update_shadow(x, y):
 				Shadow.set_cell(x, y, 4)
 		[true, true, true]:
 			Shadow.set_cell(x, y, 7)
+
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####

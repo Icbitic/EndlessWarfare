@@ -30,16 +30,7 @@ func _ready():
 	if typeof(load_res) == TYPE_INT:
 		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
 			_register_cells()
-			var map_node = map.instance()
-			map_node.map_id = map_amount
-			map_amount += 1
-			map_node.generate()
-			$World.add_child(map_node)
-			add_child(test.instance())
-			$Test.add_child(test2.instance())
-			add_child(camera.instance())
-			
-			_add_packs_to_scene_tree()
+			_build_game()
 			
 	_add_commands()
 
@@ -118,6 +109,49 @@ func save_game():
 	Logger.info("Game was saved to " + path)
 	
 	_save_mapping()
+
+func get_world():
+	return $World
+
+func get_packs_manager():
+	return $PacksManager
+	
+func get_players():
+	return $World/Players
+
+func get_camera():
+	if has_node("Camera2D"):
+		return $Camera2D
+	return null
+	
+func get_test():
+	if has_node("Test"):
+		return $Test
+	return null
+	
+func get_current_map():
+	if $World.has_node("Map"):
+		return $World/Map
+	return null
+
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
+func _build_game():
+	var map_node = map.instance()
+	map_node.map_id = map_amount
+	map_amount += 1
+	map_node.generate()
+	$World.add_child(map_node)
+	add_child(test.instance())
+	$Test.add_child(test2.instance())
+	add_child(camera.instance())
+	
+	_add_packs_to_scene_tree()
+	return OK
 
 func _get_node_in_group_in_order(group, nodes = [], node = self):
 	for i in node.get_children():

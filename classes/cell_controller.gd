@@ -55,7 +55,13 @@ func get_layer_by_name(cell_name):
 func get_layer_by_id(id):
 	var layer = name_to_cell[id_to_name[id]].layer
 	return layer
-	
+
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
 func _list_mapping_cmd():
 	Console.write(JSON.print(name_to_cell, "\t"))
 	Console.write("\n")

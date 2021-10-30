@@ -415,6 +415,7 @@ func _remove_commands():
 	Console.remove_command("updatemap")
 	Console.remove_command("penu")
 	Console.remove_command("pend")
+	Console.remove_command("penr")
 	Console.remove_command("pent")
 	
 func _setterrain_cmd(x, y, tile):

@@ -106,7 +106,14 @@ func generate():
 	
 	terrain_generator.generate(self)
 
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
 func _set_objects(value):
 	for i in value.keys():
 		var pos = i.substr(1, i.length() - 2).split(",")
 		objects[Vector3(pos[0].to_int(), pos[1].to_int(), pos[2].to_int())] = value[i]
+	return OK

@@ -142,6 +142,12 @@ func save():
 	}
 	return save_dict
 
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
 func _tp_cmd(pos_x, pos_y):
 	position = Vector2((pos_x - 0.5 * Settings.map_size) * TEXTURE_SHEET_WIDTH,
 			(pos_y - 0.5 * Settings.map_size) * TEXTURE_SHEET_WIDTH)
@@ -150,6 +156,7 @@ func _tp_cmd(pos_x, pos_y):
 	
 	Console.write_line("Camera moved to " + str(position))
 	Logger.info("Camera moved to " + str(position))
+	return OK
 
 func _tpd_cmd(des):
 	if TPDestinations.has(des):
@@ -160,3 +167,4 @@ func _tpd_cmd(des):
 	else:
 		Console.write_line("ERROR: Can't find keyword " + des)
 		Logger.error("Can't find keyword " + des)
+	return OK

@@ -124,6 +124,11 @@ func generate(chunks):
 						chunks.set_cell(m, n, Settings.TERRAIN, Settings.LAND)
 	return OK
 
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
 
 func _get_falloff_value(x, y):
 	var value = max(abs(x - map_midpoint.x) / (0.5 * map_size), abs(y - map_midpoint.y) / (0.5 * map_size))
