@@ -24,7 +24,7 @@ var chunks_data: Dictionary setget _set_chunks_data
 
 var is_first_generated = false
 
-var pen_state = false
+var pen_state = PEN_UP
 var pen_tile = -1
 
 onready var tree = preload("res://game_world/objects/plants/tree.tscn")
@@ -62,7 +62,7 @@ func _unhandled_input(event):
 			PEN_REMOVE:
 				_remove_cell_fixed_objects_in_z(pos.x, pos.y)
 			_:
-				Logger.error("Unknow pen state: " + pen_state)
+				Logger.error("Unknow pen state: " + str(pen_state))
 		get_tree().set_input_as_handled()
 
 # Public Methods
