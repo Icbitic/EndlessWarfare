@@ -41,6 +41,8 @@ func get_id_by_name(cell_name: String):
 
 # id -> cell_name
 func get_name_by_id(id):
+	if id == -1:
+		return "NULL"
 	if not id_to_name.has(id):
 		return ERR_DOES_NOT_EXIST
 	return id_to_name[id]

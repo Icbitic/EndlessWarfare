@@ -4,6 +4,8 @@ signal cell_set(pos, tile)
 signal tilemap_updated
 signal map_generated
 
+enum {PEN_UP, PEN_DRAW, PEN_REMOVE}
+
 const CHUNK_SIZE = 16
 const CHUNK_MIDPOINT = Vector2(0.5, 0.5) * CHUNK_SIZE
 const CHUNK_END_SIZE = CHUNK_SIZE - 1
@@ -22,7 +24,7 @@ var chunks_data: Dictionary setget _set_chunks_data
 
 var is_first_generated = false
 
-var is_pen_down = false
+var pen_state = false
 var pen_tile = -1
 
 onready var tree = preload("res://game_world/objects/plants/tree.tscn")
@@ -50,9 +52,17 @@ func _ready():
 	_update_tilemap(is_first_generated)
 
 func _unhandled_input(event):
-	if event.is_action_pressed("construct") and is_pen_down:
+	if event.is_action_pressed("construct"):
 		var pos = $Terrain.world_to_map(get_global_mouse_position())
-		set_cell(pos.x, pos.y, pen_tile)
+		match pen_state:
+			PEN_UP:
+				pass
+			PEN_DRAW:
+				set_cell(pos.x, pos.y, pen_tile)
+			PEN_REMOVE:
+				_remove_cell_fixed_objects_in_z(pos.x, pos.y)
+			_:
+				Logger.error("Unknow pen state: " + pen_state)
 		get_tree().set_input_as_handled()
 
 # Public Methods
@@ -84,6 +94,7 @@ func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 		_remove_fixed_objects(Vector2(x, y), Vector2(x, y))
 	if z == Settings.TERRAIN and tile == Settings.WATER:
 		_remove_fixed_objects(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+	# Set on WATER.
 	if (not z == Settings.TERRAIN) and (not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND):
 		return ERR_CANT_CREATE
 		
@@ -187,7 +198,7 @@ func _draw_cell(x, y, z, update_plants, update_bitmask = true):
 				$Wall.update_bitmask_area(Vector2(x, y))
 			return OK
 		Settings.PLANT:
-			if update_plants == true:
+			if update_plants == true and not $Trees.has_node("#" + str(Vector2(x, y))):
 				match get_cell(x, y, Settings.PLANT):
 					Settings.TREE:
 						_add_plant(Settings.TREE, x, y)
@@ -380,13 +391,17 @@ func _add_commands():
 	.set_description("Pen up.")\
 	.register()
 	
-	Console.add_command("pend", self, "_pendown_cmd")\
-	.set_description("Pen down.")\
+	Console.add_command("pend", self, "_pendraw_cmd")\
+	.set_description("Pen draw.")\
+	.register()
+	
+	Console.add_command("penr", self, "_penremove_cmd")\
+	.set_description("Pen remove.")\
 	.register()
 	
 	Console.add_command("pent", self, "_pentile_cmd")\
 	.add_argument("tile", TYPE_INT)\
-	.set_description("Set pen tile")\
+	.set_description("Set pen tile, while switching into PEN_DRAW.")\
 	.register()
 	
 func _remove_commands():
@@ -443,14 +458,19 @@ func _updatetilemap_cmd():
 	Logger.info("Tilemaps updated.")
 
 func _penup_cmd():
-	is_pen_down = false
+	pen_state = PEN_UP
 	Console.write_line("Pen up")
 	
-func _pendown_cmd():
-	is_pen_down = true
+func _pendraw_cmd():
+	pen_state = PEN_DRAW
 	Console.write_line("Pen down")
+	
+func _penremove_cmd():
+	pen_state = PEN_REMOVE
+	Console.write_line("Pen remove")
 	
 func _pentile_cmd(tile):
 	pen_tile = tile
+	pen_state = PEN_DRAW
 	Console.write_line("Pen tile set to " + CellController.get_name_by_id(tile) +
 			": " + str(tile))

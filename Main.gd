@@ -7,7 +7,7 @@ var packs
 
 onready var test = preload("res://test/test.tscn")
 onready var test2 = preload("res://test/test2.tscn")
-onready var map = preload("res://game_world/Map.tscn")
+onready var map = preload("res://game_world/map.tscn")
 onready var camera = preload("res://game_world/camera.tscn")
 
 var map_amount = 0

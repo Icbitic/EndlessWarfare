@@ -2,8 +2,9 @@ extends PlaneMap
 
 var cell = {
 	-1: -1,
-	7: 0,
-	8: 1
+	6: 0,
+	7: 1,
+	8: 2
 }
 
 func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, autotile_coord = Vector2()):
