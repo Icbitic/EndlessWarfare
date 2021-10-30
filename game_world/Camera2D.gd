@@ -84,34 +84,53 @@ func _process(delta):
 func _unhandled_input(event):
 	if Input.is_action_pressed("ui_right"):
 		input.ui_right = true
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_pressed("ui_left"):
 		input.ui_left = true
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_pressed("ui_down"):
 		input.ui_down = true
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_pressed("ui_up"):
 		input.ui_up = true
+		get_tree().set_input_as_handled()
+		
 		
 	if Input.is_action_just_released("ui_right"):
 		input.ui_right = false
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_just_released("ui_left"):
 		input.ui_left = false
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_just_released("ui_down"):
 		input.ui_down = false
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_just_released("ui_up"):
 		input.ui_up = false
-	
+		get_tree().set_input_as_handled()
 	
 	
 	if Input.is_action_just_released("zoom_in"):
 		input.zoom_in = true
+		get_tree().set_input_as_handled()
+		
 	if Input.is_action_just_released("zoom_out"):
 		input.zoom_out = true
+		get_tree().set_input_as_handled()
+		
 		
 	if not Input.is_action_just_released("zoom_in"):
 		input.zoom_in = false
+		
 	if not Input.is_action_just_released("zoom_out"):
 		input.zoom_out = false
-	
+		
 
 func save():
 	var save_dict = {

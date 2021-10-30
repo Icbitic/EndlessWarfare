@@ -4,13 +4,17 @@ var GlobalNavigation
 
 enum {LEFT, LEFTTOP, TOP}
 
-onready var Shadow = get_parent().get_node("Shadow")
+var cell = {
+	-1: -1,
+	10: 0
+}
 
 var map_size = Settings.map_size
 var shadow = []
 
+onready var Shadow = get_parent().get_node("Shadow")
+
 func _ready():
-	pass
 	shadow.resize(map_size)
 	for i in range(map_size):
 		var shadow_column = []
@@ -46,7 +50,15 @@ func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, aut
 		update_shadow(x, y + 1)
 		
 		GlobalNavigation.remove_cell(x, y)
-	.set_cell(x, y, tile, flip_x, flip_y, transpose, autotile_coord)
+	
+	# Update the cell itself to avoid shadow bugs.
+	update_shadow(x, y)
+	
+	if cell.has(tile):
+		.set_cell(x, y, cell[tile], flip_x, flip_y, transpose, autotile_coord)
+		return OK
+	else:
+		return ERR_DOES_NOT_EXIST
 
 # When I write this, Only god and I know how the code runs.
 # Now, Only God knows.

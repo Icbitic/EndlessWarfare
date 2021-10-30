@@ -24,13 +24,12 @@ func _ready():
 	Logger.output_format = "[{TIME}][{LVL}]{MSG}"
 	# Load mods from the mods folder.
 	
-	_register_cells()
-	
 	_load_mods_to_project()
 	var load_res = load_game()
 	
 	if typeof(load_res) == TYPE_INT:
 		if load_res == ERR_DOES_NOT_EXIST or load_res == ERR_FILE_NOT_FOUND:
+			_register_cells()
 			var map_node = map.instance()
 			map_node.map_id = map_amount
 			map_amount += 1
@@ -137,19 +136,20 @@ func _save_mapping():
 	return OK
 
 func _register_cells():
-	CellController.add_cell("LAND", 0)
-	CellController.add_cell("WATER", 1)
-	CellController.add_cell("DIRT_ROAD", 1)
-	CellController.add_cell("STONE_ROAD", 2)
-	CellController.add_cell("CEMENT_ROAD", 3)
-	CellController.add_cell("MUD_ROAD", 4)
-	CellController.add_cell("CLEAN_FLOOR", 1)
-	CellController.add_cell("CRACKED_FLOOR", 2)
-	CellController.add_cell("CRACKED_FLOOR2", 3)
-	CellController.add_cell("BLACK_WALL", 0)
-	CellController.add_cell("TREE", 0)
-	CellController.add_cell("DEAD_TREE", 1)
-	CellController.add_cell("BUSH", 2)
+	CellController.add_cell("LAND")
+	CellController.add_cell("WATER")
+	CellController.add_cell("DIRT_ROAD")
+	CellController.add_cell("STONE_ROAD")
+	CellController.add_cell("CEMENT_ROAD")
+	CellController.add_cell("MUD_ROAD")
+	CellController.add_cell("CLEAN_FLOOR")
+	CellController.add_cell("CRACKED_FLOOR")
+	CellController.add_cell("CRACKED_FLOOR2")
+	CellController.add_cell("BLACK_WALL")
+	CellController.add_cell("FENCE")
+	CellController.add_cell("TREE")
+	CellController.add_cell("DEAD_TREE")
+	CellController.add_cell("BUSH")
 	
 func _add_commands():
 	Console.add_command("loadmods", self, "_loadmods_cmd")\
@@ -274,10 +274,10 @@ func _load_mapping_file():
 	var save_mapping = File.new()
 	var res = save_mapping.open(path, File.READ)
 	if res == OK:
-		var mapping: Dictionary = parse_json(save_mapping.get_line())
+		var mappings: Dictionary = parse_json(save_mapping.get_line())
 		
-		for i in mapping.keys():
-			CellController.set(i, mapping[i])
+		for i in mappings.keys():
+			CellController.set(i, mappings[i])
 		
 		save_mapping.close()
 		Logger.info("Game mapping data was loaded from " + path)

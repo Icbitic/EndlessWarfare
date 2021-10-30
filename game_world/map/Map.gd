@@ -23,7 +23,7 @@ var chunks_data: Dictionary setget _set_chunks_data
 var is_first_generated = false
 
 var is_pen_down = false
-var pen_layer = 0
+var pen_layer = Settings.WALL
 var pen_tile = -1
 
 onready var tree = preload("res://game_world/objects/plants/tree.tscn")
@@ -50,10 +50,11 @@ func _ready():
 	# Add trees to the scene tree.
 	_update_tilemap(is_first_generated)
 
-func _input(event):
+func _unhandled_input(event):
 	if event.is_action_pressed("construct") and is_pen_down:
 		var pos = $Terrain.world_to_map(get_global_mouse_position())
 		set_cell(pos.x, pos.y, pen_layer, pen_tile)
+		get_tree().set_input_as_handled()
 
 # Public Methods
 func generate():
@@ -321,49 +322,49 @@ func _update_navigation_cell(pos_x, pos_y):
 		$Navigation.remove_cell(pos_x, pos_y)
 
 func _add_commands():
-	Console.add_command("setterrain", self, "_setterrain_cmd")\
+	Console.add_command("sett", self, "_setterrain_cmd")\
 	.set_description("Set terrain.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setpath", self, "_setpath_cmd")\
+	Console.add_command("setpa", self, "_setpath_cmd")\
 	.set_description("Set path.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setfloor", self, "_setfloor_cmd")\
+	Console.add_command("setfl", self, "_setfloor_cmd")\
 	.set_description("Set floor.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setfence", self, "_setfence_cmd")\
+	Console.add_command("setfe", self, "_setfence_cmd")\
 	.set_description("Set fence.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setwall", self, "_setwall_cmd")\
+	Console.add_command("setw", self, "_setwall_cmd")\
 	.set_description("Set wall.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setplant", self, "_setplant_cmd")\
+	Console.add_command("setpl", self, "_setplant_cmd")\
 	.set_description("Set plant.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("setcell", self, "_setcell_cmd")\
+	Console.add_command("setc", self, "_setcell_cmd")\
 	.set_description("Set cell.")\
 	.add_argument("pos_x", TYPE_INT)\
 	.add_argument("pos_y", TYPE_INT)\
@@ -371,41 +372,41 @@ func _add_commands():
 	.add_argument("tile", TYPE_INT)\
 	.register()
 	
-	Console.add_command("updatetilemap", self, "_updatetilemap_cmd")\
+	Console.add_command("updatemap", self, "_updatetilemap_cmd")\
 	.set_description("Update the tilemap.")\
 	.register()
 	
-	Console.add_command("penup", self, "_penup_cmd")\
+	Console.add_command("penu", self, "_penup_cmd")\
 	.set_description("Pen up.")\
 	.register()
 	
-	Console.add_command("pendown", self, "_pendown_cmd")\
+	Console.add_command("pend", self, "_pendown_cmd")\
 	.set_description("Pen down.")\
 	.register()
 	
-	Console.add_command("penlayer", self, "_penlayer_cmd")\
+	Console.add_command("penl", self, "_penlayer_cmd")\
 	.add_argument("layer", TYPE_INT)\
 	.set_description("Set pen layer")\
 	.register()
 	
-	Console.add_command("pentile", self, "_pentile_cmd")\
+	Console.add_command("pent", self, "_pentile_cmd")\
 	.add_argument("tile", TYPE_INT)\
 	.set_description("Set pen tile")\
 	.register()
 	
 func _remove_commands():
-	Console.remove_command("setterrain")
-	Console.remove_command("setpath")
-	Console.remove_command("setfloor")
-	Console.remove_command("setfence")
-	Console.remove_command("setwall")
-	Console.remove_command("setplant")
-	Console.remove_command("setcell")
-	Console.remove_command("updatetilemap")
-	Console.remove_command("penup")
-	Console.remove_command("pendown")
-	Console.remove_command("penlayer")
-	Console.remove_command("pentile")
+	Console.remove_command("sett")
+	Console.remove_command("setpa")
+	Console.remove_command("setfl")
+	Console.remove_command("setfe")
+	Console.remove_command("setw")
+	Console.remove_command("setpl")
+	Console.remove_command("setc")
+	Console.remove_command("updatemap")
+	Console.remove_command("penu")
+	Console.remove_command("pend")
+	Console.remove_command("penl")
+	Console.remove_command("pent")
 	
 func _setterrain_cmd(x, y, tile):
 	set_cell(x, y, Settings.TERRAIN, tile)

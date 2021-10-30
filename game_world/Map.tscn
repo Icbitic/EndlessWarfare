@@ -1,8 +1,8 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://tilesets/path.tres" type="TileSet" id=1]
 [ext_resource path="res://game_world/map/terrain.gd" type="Script" id=2]
-[ext_resource path="res://game_world/map/plane_map.gd" type="Script" id=3]
+[ext_resource path="res://game_world/fence.gd" type="Script" id=3]
 [ext_resource path="res://game_world/map/map.gd" type="Script" id=4]
 [ext_resource path="res://tilesets/wall.tres" type="TileSet" id=5]
 [ext_resource path="res://game_world/map/wall.gd" type="Script" id=6]
@@ -11,6 +11,8 @@
 [ext_resource path="res://tilesets/terrain.tres" type="TileSet" id=9]
 [ext_resource path="res://tilesets/floor.tres" type="TileSet" id=10]
 [ext_resource path="res://tilesets/fence.tres" type="TileSet" id=11]
+[ext_resource path="res://game_world/path.gd" type="Script" id=12]
+[ext_resource path="res://game_world/floor.gd" type="Script" id=13]
 
 [node name="Map" type="Node2D"]
 script = ExtResource( 4 )
@@ -27,13 +29,13 @@ script = ExtResource( 2 )
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 8, 8 )
 format = 1
-script = ExtResource( 3 )
+script = ExtResource( 12 )
 
 [node name="Floor" type="TileMap" parent="."]
 tile_set = ExtResource( 10 )
 cell_size = Vector2( 8, 8 )
 format = 1
-script = ExtResource( 3 )
+script = ExtResource( 13 )
 
 [node name="Fence" type="TileMap" parent="."]
 tile_set = ExtResource( 11 )

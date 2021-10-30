@@ -2,10 +2,8 @@ extends PlaneMap
 
 var cell = {
 	-1: -1,
-	2: 0,
-	3: 1,
-	4: 2,
-	5: 3
+	7: 0,
+	8: 1
 }
 
 func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, autotile_coord = Vector2()):
@@ -14,4 +12,3 @@ func set_cell(x, y, tile, flip_x = false, flip_y = false, transpose = false, aut
 		return OK
 	else:
 		return ERR_DOES_NOT_EXIST
-

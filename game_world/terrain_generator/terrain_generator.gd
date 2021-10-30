@@ -67,19 +67,19 @@ func generate(chunks):
 			else:
 				chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.TREE)
 	
-	# Add Bushes
-	# warning-ignore:unused_variable
-	for i in range(map_size * map_size * BUSH_DENSITY):
-		var pos_x = int(rand_range(0, map_size))
-		var pos_y = int(rand_range(0, map_size))
-		var is_surrounded = true
-		for x in range(pos_x - 2, pos_x + 3):
-			for y in range(pos_y - 2, pos_y + 3):
-				if x >= 0 and x < map_size and y >= 0 and y < map_size:
-					if not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND:
-						is_surrounded = false
-		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
-			chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.BUSH)
+#	# Add Bushes
+#	# warning-ignore:unused_variable
+#	for i in range(map_size * map_size * BUSH_DENSITY):
+#		var pos_x = int(rand_range(0, map_size))
+#		var pos_y = int(rand_range(0, map_size))
+#		var is_surrounded = true
+#		for x in range(pos_x - 2, pos_x + 3):
+#			for y in range(pos_y - 2, pos_y + 3):
+#				if x >= 0 and x < map_size and y >= 0 and y < map_size:
+#					if not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND:
+#						is_surrounded = false
+#		if is_surrounded and chunks.has_fixed_objects(pos_x, pos_y):
+#			chunks.set_cell(pos_x, pos_y, Settings.PLANT, Settings.BUSH)
 	
 	# Post process the map
 	# First to remove the cells of wrong bitmasks
