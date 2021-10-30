@@ -1,17 +1,36 @@
 extends Navigation2D
 
+signal cell_added(pos)
+signal cell_removed(pos)
+signal updated
 
+# Public Methods
+func add_cell(x, y):
+	$TileMap.set_cell(x, y, 0)
+	emit_signal("cell_added", Vector2(x, y))
+	
+func add_cellv(pos):
+	$TileMap.set_cell(pos, 0)
+	emit_signal("cell_added", pos)
 
-#APIs
+func remove_cell(x, y):
+	$TileMap.set_cell(x, y, -1)
+	emit_signal("cell_removed", Vector2(x, y))
+	
+func remove_cellv(pos):
+	$TileMap.set_cell(pos, -1)
+	emit_signal("cell_removed", pos)
+	
+func update():
+	$TileMap.update_dirty_quadrants()
+	emit_signal("updated")
+	
 func search_path(start: Vector2, end: Vector2, optimize: bool = true):
 	
-	if Info.settings.record_navigation_details:
+	if Settings.record_navigation_details:
 		if optimize:
-			LogRecorder.record("Calculated optimized path from "
-					+ str(start) + " to " + str(end))
+			Logger.info("Calculated optimized path from " + str(start) + " to " + str(end))
 		else:
-			LogRecorder.record("Calculated path from "
-					+ str(start) + " to " + str(end))
+			Logger.info("Calculated path from " + str(start) + " to " + str(end))
 	
-	return get_simple_path(start * Info.constant.cell_size,
-			end * Info.constant.cell_size, optimize)
+	return get_simple_path(start * Settings.cell_size, end * Settings.cell_size, optimize)
