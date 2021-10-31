@@ -1,0 +1,8 @@
+{
+    "name":"TestMod",
+    "version": "0.0.1",
+    "version_support":[
+        "*"
+    ],
+    "is_enabled": true
+}
