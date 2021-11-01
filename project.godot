@@ -12,49 +12,37 @@ _global_script_classes=[ {
 "base": "Node2D",
 "class": "Chunk",
 "language": "GDScript",
-"path": "res://game_world/chunk.gd"
+"path": "res://game_world/src/chunk.gd"
 }, {
 "base": "Resource",
 "class": "Chunks",
 "language": "GDScript",
-"path": "res://game_world/map/chunks.gd"
-}, {
-"base": "Node2D",
-"class": "Database",
-"language": "GDScript",
-"path": "res://game_world/database.gd"
+"path": "res://game_world/map/src/chunks.gd"
 }, {
 "base": "Node",
 "class": "Pack",
 "language": "GDScript",
-"path": "res://packs_manager/pck.gd"
-}, {
-"base": "Node",
-"class": "PersistObject",
-"language": "GDScript",
-"path": "res://classes/persist_object.gd"
+"path": "res://root/packs_manager/src/pck.gd"
 }, {
 "base": "TileMap",
 "class": "PlaneMap",
 "language": "GDScript",
-"path": "res://game_world/map/plane_map.gd"
+"path": "res://game_world/map/src/plane_map.gd"
 }, {
 "base": "Sprite",
 "class": "Plant",
 "language": "GDScript",
-"path": "res://classes/plant.gd"
+"path": "res://game_world/objects/plants/src/plant.gd"
 }, {
 "base": "Resource",
 "class": "TerrainGenerator",
 "language": "GDScript",
-"path": "res://game_world/terrain_generator/terrain_generator.gd"
+"path": "res://game_world/terrain_generator/src/terrain_generator.gd"
 } ]
 _global_script_class_icons={
 "Chunk": "",
 "Chunks": "",
-"Database": "",
 "Pack": "",
-"PersistObject": "",
 "PlaneMap": "",
 "Plant": "",
 "TerrainGenerator": ""
@@ -63,19 +51,18 @@ _global_script_class_icons={
 [application]
 
 config/name="Endless Warfare"
-run/main_scene="res://main.tscn"
+run/main_scene="res://root/main/scene/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name=".endlesswarfare"
 boot_splash/image="res://bootsplash.png"
 boot_splash/use_filter=false
-config/icon="res://icon.png"
 
 [autoload]
 
-Settings="*res://settings.gd"
-Logger="*res://logger.gd"
+Settings="*res://autoload/settings.gd"
+Logger="*res://autoload/logger.gd"
 Console="*res://addons/quentincaffeino/console/src/Console.tscn"
-CellController="*res://classes/cell_controller.gd"
+CellController="*res://autoload/cell_controller.gd"
 
 [display]
 

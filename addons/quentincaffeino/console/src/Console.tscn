@@ -1,9 +1,10 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://addons/quentincaffeino/console/src/Console.gd" type="Script" id=1]
-[ext_resource path="res://fonts/pixel_font.tres" type="DynamicFont" id=2]
+[ext_resource path="res://asset/fonts/pixel_font.tres" type="DynamicFont" id=2]
 [ext_resource path="res://addons/quentincaffeino/console/src/ConsoleLine.gd" type="Script" id=6]
 [ext_resource path="res://addons/quentincaffeino/console/assets/themes/Console.tres" type="Theme" id=7]
+
 
 [sub_resource type="Animation" id=1]
 length = 0.25
