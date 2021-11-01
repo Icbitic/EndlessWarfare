@@ -62,7 +62,8 @@ func load_settings():
 	draw_cell_outline = config.get_value("Tech", "draw_cell_outline")
 	save_before_quit = config.get_value("Tech", "save_before_quit")
 	
-	var code = config.get_value("Verification", "verification_code")
+	var code
+	code = config.get_value("Verification", "verification_code")
 	
 	if code != verification_code:
 		is_offical = false

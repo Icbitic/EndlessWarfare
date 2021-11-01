@@ -413,5 +413,6 @@ func _orphan_cmd():
 	Console.write_line("Orphan nodes are printed in logger.")
 
 func _open_user_cmd():
-	OS.shell_open(OS.get_user_data_dir())
+	var err = OS.shell_open(OS.get_user_data_dir())
 	Console.write_line("User data dir opened.")
+	return err
