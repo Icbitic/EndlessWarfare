@@ -19,13 +19,13 @@ var map_size
 
 var thread
 
-var chunks: Chunks
-var chunks_data: Dictionary setget _set_chunks_data
+var chunks
 
 var is_first_generated = false
 
 var pen_state = PEN_UP
 var pen_tile = -1
+
 
 onready var tree = preload("res://game_world/objects/plants/scene/tree.tscn")
 onready var dead_tree = preload("res://game_world/objects/plants/scene/dead_tree.tscn")
@@ -76,9 +76,12 @@ func generate():
 	# Todo: use thread to generate chunks.
 	#thread = Thread.new()
 	#thread.start(self, "generate")
+	var chunks_path = preload("res://game_world/scene/chunks.tscn")
+	add_child(chunks_path.instance())
 	
-	chunks = Chunks.new()
-	chunks.setup(map_size)
+	chunks = $Chunks
+	
+	chunks.setup_map(map_size)
 	var err = _generate(map_size)
 	return err
 		
@@ -86,7 +89,6 @@ func save():
 	var save_dict = {
 		"filename": get_filename(),
 		"parent" : get_parent().get_path(),
-		"chunks_data": chunks.get_persist_data(),
 		"map_size": map_size
 	}
 	return save_dict
@@ -95,6 +97,7 @@ func save():
 func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 	var z = CellController.get_layer_by_id(tile)
 	var result
+	
 	if z == -1:
 		_remove_cell_fixed_objects_in_z(x, y)
 		result = chunks.clear_fixed_object(x, y)

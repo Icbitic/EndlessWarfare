@@ -206,6 +206,7 @@ func _register_cells():
 	CellController.add_cell("TREE", Settings.PLANT)
 	CellController.add_cell("DEAD_TREE", Settings.PLANT)
 	CellController.add_cell("BUSH", Settings.PLANT)
+	return OK
 	
 func _add_commands():
 	Console.add_command("loadmods", self, "_loadmods_cmd")\
