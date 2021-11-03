@@ -77,16 +77,22 @@ func generate():
 	add_child(chunks_path.instance())
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
 	chunks = $Chunks
 	
 	chunks.setup_map(map_size)
 	var err = _generate(map_size)
 	return err
 =======
+=======
+>>>>>>> parent of 61f0382 (Add return value)
 	chunks = Chunks.new()
 	chunks.setup(map_size)
 	_generate(map_size)
 	
+<<<<<<< HEAD
+>>>>>>> parent of 61f0382 (Add return value)
+=======
 >>>>>>> parent of 61f0382 (Add return value)
 		
 func save():
@@ -100,12 +106,15 @@ func save():
 func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 	var z = CellController.get_layer_by_id(tile)
 <<<<<<< HEAD
+<<<<<<< HEAD
 	var result
 	
 	if z == -1:
 		_remove_cell_fixed_objects_in_z(x, y)
 		result = chunks.clear_fixed_object(x, y)
 =======
+=======
+>>>>>>> parent of 61f0382 (Add return value)
 	if z == Settings.WALL:
 		_remove_fixed_objects(Vector2(x, y), Vector2(x, y))
 	if z == Settings.TERRAIN and tile == Settings.WATER:
@@ -113,6 +122,9 @@ func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 	# Set on WATER.
 	if (not z == Settings.TERRAIN) and (not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND):
 		return ERR_CANT_CREATE
+<<<<<<< HEAD
+>>>>>>> parent of 61f0382 (Add return value)
+=======
 >>>>>>> parent of 61f0382 (Add return value)
 		
 	var result = chunks.set_cell(x, y, z, tile)
