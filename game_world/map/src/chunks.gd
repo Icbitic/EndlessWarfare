@@ -1,5 +1,5 @@
 class_name Chunks
-extends Node
+extends Resource
 
 
 const CHUNK_SIZE = 16
@@ -10,22 +10,7 @@ var objects = {} setget _set_objects
 # Seperate the terrian to use less memory.
 var terrian = []
 
-func _ready():
-	add_to_group("Persist")
-	return OK
-	
-func save():
-	for i in objects.keys():
-		if objects[i] == -1:
-			objects.erase(i)
-	var save_dict = {
-		"objects": objects,
-		"terrian": terrian,
-		"map_size": map_size
-	}
-	return save_dict
-	
-func setup_map(size):
+func setup(size):
 	Logger.info("Chunks of a " + str(size) + "x map was set up.")
 	map_size = size
 	# Initialize the terrian array
@@ -36,6 +21,16 @@ func setup_map(size):
 		terrian_column.resize(map_size)
 		terrian[i] = terrian_column
 		
+func get_persist_data():
+	for i in objects.keys():
+		if objects[i] == -1:
+			objects.erase(i)
+	var save_dict = {
+		"objects": objects,
+		"terrian": terrian,
+		"map_size": map_size
+	}
+	return save_dict
 
 # Only returns cells except TERRIAN.
 func get_all_objects():
