@@ -35,6 +35,7 @@ func _exit_tree():
 	if thread != null:
 		thread.wat_to_finish()
 	_remove_commands()
+	return OK
 
 func _ready():
 	add_to_group("Persist")
@@ -50,6 +51,7 @@ func _ready():
 	# So when it is the first time, and the is_first_generated is true.
 	# Add trees to the scene tree.
 	_update_tilemap(is_first_generated)
+	return OK
 
 func _unhandled_input(event):
 	if event.is_action_pressed("construct"):
@@ -60,10 +62,11 @@ func _unhandled_input(event):
 			PEN_DRAW:
 				set_cell(pos.x, pos.y, pen_tile)
 			PEN_REMOVE:
-				_remove_cell_fixed_objects_in_z(pos.x, pos.y)
+				set_cell(pos.x, pos.y, -1)
 			_:
 				Logger.error("Unknow pen state: " + str(pen_state))
 		get_tree().set_input_as_handled()
+	return OK
 
 # Public Methods
 func generate():
@@ -76,8 +79,8 @@ func generate():
 	
 	chunks = Chunks.new()
 	chunks.setup(map_size)
-	_generate(map_size)
-	
+	var err = _generate(map_size)
+	return err
 		
 func save():
 	var save_dict = {
@@ -88,17 +91,26 @@ func save():
 	}
 	return save_dict
 
+# Delete all cells in z axis.
 func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 	var z = CellController.get_layer_by_id(tile)
-	if z == Settings.WALL:
-		_remove_fixed_objects(Vector2(x, y), Vector2(x, y))
-	if z == Settings.TERRAIN and tile == Settings.WATER:
-		_remove_fixed_objects(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
-	# Set on WATER.
-	if (not z == Settings.TERRAIN) and (not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND):
-		return ERR_CANT_CREATE
+	var result
+	if z == -1:
+		_remove_cell_fixed_objects_in_z(x, y)
+		result = chunks.clear_fixed_object(x, y)
 		
-	var result = chunks.set_cell(x, y, z, tile)
+	else:
+		if z == Settings.WALL:
+			_remove_fixed_objects(Vector2(x, y), Vector2(x, y))
+			
+		if z == Settings.TERRAIN and tile == Settings.WATER:
+			_remove_fixed_objects(Vector2(x - 1, y - 1), Vector2(x + 1, y + 1))
+			
+		# Set on WATER.
+		if (not z == Settings.TERRAIN) and (not chunks.get_cell(x, y, Settings.TERRAIN) == Settings.LAND):
+			return ERR_CANT_CREATE
+			
+		result = chunks.set_cell(x, y, z, tile)
 	
 	_update_navigation_cell(x, y)
 	
@@ -106,12 +118,24 @@ func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 	emit_signal("cell_set", Vector3(x, y, z), tile)
 	return result
 
+func set_cellv(pos: Vector2, tile, update_plants = true, update_bitmask = true):
+	var err = set_cell(pos.x, pos.y, tile, update_plants, update_bitmask)
+	return err
+	
 # This method does not check if the key exists in chunks
 # If the key does not exist in chunks, the program will CRASH!!!
 func get_cell(x, y, z):
 	return chunks.get_cell(x, y, z)
 
-# Private Methods
+func get_cellv(pos: Vector3):
+	return chunks.get_cell(pos.x, pos.y, pos.z)
+
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
 func _generate(size):
 	Logger.info("Starting generating the map.")
 	var initial_time = OS.get_ticks_msec()
@@ -248,6 +272,7 @@ func _draw_cell_in_z_axis(x, y, update_plants, update_bitmask = true):
 				_add_plant(Settings.BUSH, x, y)
 			_:
 				_remove_plant(x, y)
+	return OK
 	
 func _remove_cell_fixed_objects_in_z(x, y, update_bitmask = true):
 	if chunks.has_cell(x, y, Settings.PATH):
@@ -272,6 +297,7 @@ func _remove_cell_fixed_objects_in_z(x, y, update_bitmask = true):
 	
 	if chunks.has_cell(x, y, Settings.PLANT):
 		_remove_plant(x, y)
+	return OK
 	
 func _add_plant(plant_type, pos_x, pos_y):
 	var tree_node
@@ -303,7 +329,7 @@ func _remove_plant(pos_x, pos_y):
 func _remove_fixed_objects(from: Vector2, to: Vector2):
 	for i in range(from.x, to.x + 1):
 		for j in range(from.y, to.y + 1):
-			chunks.clear_fixed_object(Vector2(i, j))
+			chunks.clear_fixed_object(i, j)
 			_draw_cell_in_z_axis(i, j, true)
 	return OK
 	
@@ -324,6 +350,7 @@ func _update_navigation_mesh():
 				$Navigation.add_cell(i, j)
 			else:
 				$Navigation.remove_cell(i, j)
+	return OK
 
 func _update_navigation_cell(pos_x, pos_y):
 	if (chunks.get_cell(pos_x, pos_y, Settings.TERRAIN) == Settings.LAND
@@ -331,6 +358,7 @@ func _update_navigation_cell(pos_x, pos_y):
 		$Navigation.add_cell(pos_x, pos_y)
 	else:
 		$Navigation.remove_cell(pos_x, pos_y)
+	return OK
 
 func _add_commands():
 	Console.add_command("sett", self, "_setterrain_cmd")\
@@ -404,6 +432,8 @@ func _add_commands():
 	.set_description("Set pen tile, while switching into PEN_DRAW.")\
 	.register()
 	
+	return OK
+	
 func _remove_commands():
 	Console.remove_command("sett")
 	Console.remove_command("setpa")
@@ -417,61 +447,74 @@ func _remove_commands():
 	Console.remove_command("pend")
 	Console.remove_command("penr")
 	Console.remove_command("pent")
+	return OK
 	
 func _setterrain_cmd(x, y, tile):
 	set_cell(x, y, Settings.TERRAIN, tile)
 	Console.write_line("Terrain set at (" + str(x) + " " + str(y) + ")")
 	Logger.info("Terrain set at (" + str(x) + " " + str(y) + ")")
+	return OK
 
 func _setpath_cmd(x, y, tile):
 	set_cell(x, y, Settings.PATH, tile)
 	Console.write_line("Path set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Path set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _setfloor_cmd(x, y, tile):
 	set_cell(x, y, Settings.FLOOR, tile)
 	Console.write_line("Floor set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Floor set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _setfence_cmd(x, y, tile):
 	set_cell(x, y, Settings.FENCE, tile)
 	Console.write_line("Fence set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Fence set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _setwall_cmd(x, y, tile):
 	set_cell(x, y, Settings.WALL, tile)
 	Console.write_line("Wall set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Wall set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _setplant_cmd(x, y, tile):
 	set_cell(x, y, Settings.PLANT, tile)
 	Console.write_line("Plant set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Plant set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _setcell_cmd(x, y, z, tile):
 	set_cell(x, y, z, tile)
 	Console.write_line("Cell set at (" + str(x) + ", " + str(y) + ")")
 	Logger.info("Cell set at (" + str(x) + ", " + str(y) + ")")
+	return OK
 	
 func _updatetilemap_cmd():
 	_update_tilemap(true)
 	Console.write_line("Tilemaps updated.")
 	Logger.info("Tilemaps updated.")
+	return OK
 
 func _penup_cmd():
 	pen_state = PEN_UP
 	Console.write_line("Pen up")
+	return OK
 	
 func _pendraw_cmd():
 	pen_state = PEN_DRAW
 	Console.write_line("Pen down")
+	return OK
 	
 func _penremove_cmd():
 	pen_state = PEN_REMOVE
 	Console.write_line("Pen remove")
+	return OK
 	
 func _pentile_cmd(tile):
 	pen_tile = tile
 	pen_state = PEN_DRAW
 	Console.write_line("Pen tile set to " + CellController.get_name_by_id(tile) +
 			": " + str(tile))
+	return OK
