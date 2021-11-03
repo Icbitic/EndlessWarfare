@@ -53,8 +53,6 @@ func get_layer_by_name(cell_name):
 
 # id -> layer
 func get_layer_by_id(id):
-	if id == -1:
-		return -1
 	var layer = name_to_cell[id_to_name[id]].layer
 	return layer
 

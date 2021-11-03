@@ -89,7 +89,7 @@ func has_fixed_objects(x, y):
 			return false
 	return true
 	
-func clear_fixed_objectv(pos: Vector2):
+func clear_fixed_object(pos: Vector2):
 	if objects.has(Vector3(pos.x, pos.y, Settings.PATH)):
 		objects[Vector3(pos.x, pos.y, Settings.PATH)] = -1
 		
@@ -105,11 +105,6 @@ func clear_fixed_objectv(pos: Vector2):
 	if objects.has(Vector3(pos.x, pos.y, Settings.PLANT)):
 		objects[Vector3(pos.x, pos.y, Settings.PLANT)] = -1
 	return OK
-	
-func clear_fixed_object(pos_x, pos_y):
-	var pos = Vector2(pos_x, pos_y)
-	var err = clear_fixed_objectv(pos)
-	return err
 	
 func generate():
 	var terrain_generator = TerrainGenerator.new()
