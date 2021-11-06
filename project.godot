@@ -35,6 +35,11 @@ _global_script_classes=[ {
 "path": "res://game_world/objects/plants/src/plant.gd"
 }, {
 "base": "Resource",
+"class": "ResourceObject",
+"language": "GDScript",
+"path": "res://game_world/src/resource_object.gd"
+}, {
+"base": "Resource",
 "class": "TerrainGenerator",
 "language": "GDScript",
 "path": "res://game_world/terrain_generator/src/terrain_generator.gd"
@@ -45,6 +50,7 @@ _global_script_class_icons={
 "Pack": "",
 "PlaneMap": "",
 "Plant": "",
+"ResourceObject": "",
 "TerrainGenerator": ""
 }
 

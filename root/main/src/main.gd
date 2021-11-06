@@ -411,7 +411,8 @@ func _osinfo_cmd():
 func _orphan_cmd():
 	print_stray_nodes()
 	Console.write_line("Orphan nodes are printed in logger.")
-
+	return OK
+	
 func _open_user_cmd():
 	var err = OS.shell_open(OS.get_user_data_dir())
 	Console.write_line("User data dir opened.")

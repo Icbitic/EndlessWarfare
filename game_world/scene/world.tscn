@@ -1,15 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://game_world/src/world.gd" type="Script" id=1]
-[ext_resource path="res://game_world/src/players.gd" type="Script" id=2]
-[ext_resource path="res://game_world/src/player.gd" type="Script" id=5]
-
+[ext_resource path="res://game_world/scene/colonists.tscn" type="PackedScene" id=2]
 
 [node name="World" type="Node"]
 script = ExtResource( 1 )
 
-[node name="Players" type="Node" parent="."]
-script = ExtResource( 2 )
-
-[node name="0" type="Node" parent="Players"]
-script = ExtResource( 5 )
+[node name="Colonists" parent="." instance=ExtResource( 2 )]

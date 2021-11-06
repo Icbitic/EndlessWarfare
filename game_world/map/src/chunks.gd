@@ -1,8 +1,10 @@
 class_name Chunks
 extends Resource
 
+enum RESOURCE_TYPE {STEEL, WOOD, STONE}
 
 const CHUNK_SIZE = 16
+
 
 var map_size = Settings.map_size
 # Only store cells except TERRIAN.
@@ -10,7 +12,9 @@ var objects = {} setget _set_objects
 # Seperate the terrian to use less memory.
 var terrian = []
 
-func setup(size):
+var resources = {}
+
+func _init(size):
 	Logger.info("Chunks of a " + str(size) + "x map was set up.")
 	map_size = size
 	# Initialize the terrian array
@@ -38,6 +42,26 @@ func get_all_objects():
 	
 func getterrian():
 	return terrian
+	
+func add_resourcev(pos, object):
+	resources[pos] = object
+	return OK
+	
+func add_resource(x, y, object):
+	var err = add_resourcev(Vector2(x, y), object)
+	return err
+	
+func remove_resourcev(pos):
+	var err = resources.erase(pos)
+	return err
+	
+func remove_resource(x, y):
+	var err = remove_resourcev(Vector2(x, y))
+	return err
+	
+	
+func get_resources():
+	return resources
 	
 func set_cell(x, y, z, tile):
 	if z == Settings.TERRAIN:

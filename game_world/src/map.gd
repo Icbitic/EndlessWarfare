@@ -74,8 +74,7 @@ func generate():
 	#thread = Thread.new()
 	#thread.start(self, "generate")
 	
-	chunks = Chunks.new()
-	chunks.setup(map_size)
+	chunks = Chunks.new(map_size)
 	_generate(map_size)
 	
 		
@@ -111,7 +110,15 @@ func set_cell(x, y, tile, update_plants = true, update_bitmask = true):
 func get_cell(x, y, z):
 	return chunks.get_cell(x, y, z)
 
-# Private Methods
+func get_resources():
+	return chunks.get_resources()
+
+####               ####
+#                     #
+#   PRIVATE METHODS   #
+#                     #
+####               ####
+
 func _generate(size):
 	Logger.info("Starting generating the map.")
 	var initial_time = OS.get_ticks_msec()
@@ -131,8 +138,7 @@ func _generate(size):
 	
 func _set_chunks_data(value: Dictionary):
 	chunks = null
-	chunks = Chunks.new()
-	chunks.setup(value.map_size)
+	chunks = Chunks.new(value.map_size)
 	for i in value.keys():
 		if i == "map_size":
 			continue

@@ -25,7 +25,7 @@ func update():
 	$TileMap.update_dirty_quadrants()
 	emit_signal("updated")
 	
-func search_path(start: Vector2, end: Vector2, optimize: bool = true):
+func get_simple_path(start: Vector2, end: Vector2, optimize: bool = true):
 	
 	if Settings.record_navigation_details:
 		if optimize:
@@ -33,4 +33,4 @@ func search_path(start: Vector2, end: Vector2, optimize: bool = true):
 		else:
 			Logger.info("Calculated path from " + str(start) + " to " + str(end))
 	
-	return get_simple_path(start * Settings.cell_size, end * Settings.cell_size, optimize)
+	return .get_simple_path(start * Settings.cell_size, end * Settings.cell_size, optimize)
