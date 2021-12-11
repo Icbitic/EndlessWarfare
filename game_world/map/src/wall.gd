@@ -1,4 +1,4 @@
-extends PlaneMap
+extends TileMap
 
 var GlobalNavigation
 

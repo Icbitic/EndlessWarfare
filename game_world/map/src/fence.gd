@@ -1,4 +1,4 @@
-extends "res://game_world/map/plane_map.gd"
+extends TileMap
 
 
 func _ready():

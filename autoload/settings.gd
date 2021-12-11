@@ -25,8 +25,6 @@ var draw_chunk_outline = false
 var draw_cell_outline = false
 var save_before_quit = true
 
-var verification_code = "1234"
-var is_offical = true
 
 func _ready():
 	Console.add_command("saveset", self, "_save_settings_cmd")\
@@ -62,14 +60,6 @@ func load_settings():
 	draw_cell_outline = config.get_value("Tech", "draw_cell_outline")
 	save_before_quit = config.get_value("Tech", "save_before_quit")
 	
-	var code
-	code = config.get_value("Verification", "verification_code")
-	
-	if code != verification_code:
-		is_offical = false
-	
-	Logger.info("Verification Code: " + str(verification_code))
-	
 	return OK
 	
 func save_settings():
@@ -82,8 +72,6 @@ func save_settings():
 	config.set_value("Tech", "draw_chunk_outline", draw_chunk_outline)
 	config.set_value("Tech", "draw_cell_outline", draw_cell_outline)
 	config.set_value("Tech", "save_before_quit", save_before_quit)
-	
-	config.set_value("Verification", "verification_code", verification_code)
 	
 	#config.save("user://settings.cfg")
 	config.save_encrypted_pass("user://settings.cfg", "123456")

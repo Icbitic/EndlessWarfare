@@ -20,6 +20,10 @@ data_*/
 # Log files
 *.log
 
+*.key
+
+*.sig
+
 .vscode/
 
 # End of https://www.toptal.com/developers/gitignore/api/godot
